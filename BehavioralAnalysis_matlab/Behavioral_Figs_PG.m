@@ -7,19 +7,44 @@ Monkey = 'Pop';
 % Select the date & task to analyze (YYYYMMDD)
 Date = '20210617';
 Task = 'PG';
-% Do you want to process the XDS file? (1 = yes; 0 = no)
-Process_XDS = 1;
 
-xds_morn = Load_XDS(Monkey, Date, Task, 'Morn', Process_XDS);
-xds_noon = Load_XDS(Monkey, Date, Task, 'Noon', Process_XDS);
+xds_morn = Load_XDS(Monkey, Date, Task, 'Morn');
+xds_noon = Load_XDS(Monkey, Date, Task, 'Noon');
+
+% Process the xds files
+Match_The_Targets = 1;
+[xds_morn, xds_noon] = Process_XDS(xds_morn, xds_noon, Match_The_Targets);
 
 %% Save directory
+
+% Date
+File_Name = xds_noon.meta.rawFileName;
+nondate_info = extractAfter(File_Name, '_');
+Date = erase(File_Name, strcat('_', nondate_info));
+% Monkey
+nonmonkey_info = extractAfter(nondate_info, '_');
+% Task
+nontask_info = extractAfter(nonmonkey_info, '_');
+Task = erase(nonmonkey_info, strcat('_', nontask_info));
+% Drug
+if contains(nontask_info, 'Caff')
+    Drug = 'Caffeine';
+end
+if contains(nontask_info, 'Lex')
+    Drug = 'Escitalopram';
+end
+if contains(nontask_info, 'Cyp')
+    Drug = 'Cypro';
+end
+if contains(nontask_info, 'Con')
+    Drug = 'Control';
+end
 
 % Define the save folder
 save_folder = strcat(Date, '_', Task);
 
 % Define the save directory
-drug_save_dir = 'C:\Users\rhpow\Documents\Grad School\Figures\Pop_Cyp\';
+drug_save_dir = strcat('C:\Users\rhpow\Documents\Work\Northwestern\Figures\', Monkey, '_', Drug, '\');
 trial_save_dir = strcat(drug_save_dir, save_folder, '\Behavioral Figs\');
 if ~exist(trial_save_dir, 'dir')
     mkdir(fullfile(trial_save_dir));
@@ -37,7 +62,7 @@ Save_Figs = 'png';
 
 % Zero? (1 = Yes, 0 = No)
 zero_EMG = 1;
-zero_method = 'Percentile';
+zero_method = 'Prctile';
 
 % Normalize? (1 = Yes, 0 = No)
 norm_EMG = 1;
