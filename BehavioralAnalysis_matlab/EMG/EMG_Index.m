@@ -46,8 +46,10 @@ if strcmp(muscle_groups, 'Grasp')
 end
 
 if strcmp(muscle_groups, 'Custom')
-    muscle_names(1) = 'FDS1';
+    muscle_names(1) = 'FCR';
     muscle_names(2) = 'FDP';
+    muscle_names(3) = 'FDS';
+    muscle_names(4) = 'EDC';
 end
 
 % If muscle_names is still blank

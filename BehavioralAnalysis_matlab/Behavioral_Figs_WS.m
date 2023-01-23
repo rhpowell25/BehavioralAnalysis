@@ -1,38 +1,58 @@
+
+%% File Description:
+
+% This function plots and saves behavioral summaries for the morning &
+% afternoon xds files. These plots include reaction time box plots, trial
+% averaged EMG plots, EMG statistics, consecutive EMG plots, & cursor position plots
+
 %% Loading the morning and afternoon files
 clear
 close all
 clc
 
 % Select The Date & Task To Analyze
-Date = '20211020';
+Date = '20210610';
 Task = 'WS';
-% Do You Want To Process The XDS File? (1 = Yes; 0 = No)
-Process_XDS = 1;
 
 [xds_morn, xds_noon] = Load_XDS(Date, Task, Process_XDS);
 
-xds_morn.meta.hand = 'Left';
-xds_noon.meta.hand = 'Left';
+% Process the xds files
+Match_The_Targets = 0;
+[xds_morn, xds_noon] = Process_XDS(xds_morn, xds_noon, Match_The_Targets);
+
 
 File_Name_morn = xds_morn.meta.rawFileName;
 
 %% Save directory
 
 % Date
-nondate_info = extractAfter(File_Name_morn, '_');
-trial_date = erase(File_Name_morn, strcat('_', nondate_info));
+File_Name = xds_noon.meta.rawFileName;
+nondate_info = extractAfter(File_Name, '_');
+Date = erase(File_Name, strcat('_', nondate_info));
 % Monkey
 nonmonkey_info = extractAfter(nondate_info, '_');
-monkey_name = erase(nondate_info, strcat('_', nonmonkey_info));
 % Task
 nontask_info = extractAfter(nonmonkey_info, '_');
-trial_task = erase(nonmonkey_info, strcat('_', nontask_info));
+Task = erase(nonmonkey_info, strcat('_', nontask_info));
+% Drug
+if contains(nontask_info, 'Caff')
+    Drug = 'Caffeine';
+end
+if contains(nontask_info, 'Lex')
+    Drug = 'Escitalopram';
+end
+if contains(nontask_info, 'Cyp')
+    Drug = 'Cypro';
+end
+if contains(nontask_info, 'Con')
+    Drug = 'Control';
+end
 
 % Define the save folder
-save_folder = strcat(trial_date, '_', trial_task);
+save_folder = strcat(Date, '_', Task);
 
 % Define the save directory
-drug_save_dir = 'C:\Users\rhpow\Documents\Grad School\Figures\Pop_Cyp\';
+drug_save_dir = strcat('C:\Users\rhpow\Documents\Work\Northwestern\Figures\', Monkey, '_', Drug, '\');
 trial_save_dir = strcat(drug_save_dir, save_folder, '\Behavioral Figs\');
 if ~exist(trial_save_dir, 'dir')
     mkdir(fullfile(trial_save_dir));
@@ -50,7 +70,7 @@ Save_Figs = 'png';
 
 % Zero? (1 = Yes, 0 = No)
 zero_EMG = 1;
-zero_method = 'Percentile';
+zero_method = 'Prctile';
 
 % Normalize? (1 = Yes, 0 = No)
 norm_EMG = 1;

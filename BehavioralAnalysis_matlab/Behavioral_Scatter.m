@@ -7,10 +7,13 @@ clc
 % Select The Date & Task To Analyze
 Date = '20211001';
 Task = 'WS';
-% Do You Want To Process The XDS File? (1 = Yes; 0 = No)
-Process_XDS = 1;
 
-[xds_morn, xds_noon, xds_excel] = Load_XDS(Date, Task, Process_XDS);
+xds_morn = Load_XDS(Monkey, Date, Task, 'Morn');
+xds_noon = Load_XDS(Monkey, Date, Task, 'Noon');
+
+% Process the xds files
+Match_The_Targets = 1;
+[xds_morn, xds_noon] = Process_XDS(xds_morn, xds_noon, Match_The_Targets);
 
 % Which targets do you want the mnovement phase firing rate calculated from? ('Max', 'Min', 'All')
 tgt_mpfr = 'Max';

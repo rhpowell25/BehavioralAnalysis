@@ -1,4 +1,4 @@
-function EMG_Norm_Factor = Single_Session_NormalizeEMG(xds, muscle_groups, norm_perctile, norm_EMG)
+function EMG_Norm_Factor = Single_Session_NormalizeEMG(xds, muscle_groups, norm_prctile, norm_EMG)
 
 %% File Description:
 
@@ -24,7 +24,7 @@ if ~isequal(norm_EMG, 1)
     EMG_Norm_Factor = ones(1, length(M));
     return
 else
-    fprintf('EMG Will Be Normalized to the %ith percentile \n', norm_perctile);
+    fprintf('EMG Will Be Normalized to the %ith percentile \n', norm_prctile);
 end
 
 %% What part of the EMG do you want to take the percentile of
@@ -110,7 +110,7 @@ if strcmp(norm_method, 'Trial_EMG')
     % Find the percentile of all the EMG
     EMG_Norm_Factor = zeros(1,length(M));
     for ii = 1:length(M)
-        EMG_Norm_Factor(ii) = prctile(EMG{ii}, norm_perctile);
+        EMG_Norm_Factor(ii) = prctile(EMG{ii}, norm_prctile);
     end
 
 end
