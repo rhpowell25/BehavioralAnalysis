@@ -1,40 +1,21 @@
-function [avg_z_force] = PlotForce(xds, event, unit_name, Force_Norm_Factor, force_YLims, Plot_Figs, Save_Figs)
-
-%% Load the excel file
-if ~isnan(unit_name)
-    if ~ischar(unit_name)
-    
-        [xds_output] = Find_Excel(xds);
-    
-        %% Find the unit of interest
-    
-        unit = xds_output.unit_names(unit_name);
-    
-        %% Identify the index of the unit
-        N = find(strcmp(xds.unit_names, unit));
-    
-    else
-        N = find(strcmp(xds.unit_names, unit_name));
-    end
-
-    %% End the function with NaN output variables if the unit doesnt exist
-    if isempty(N)
-        fprintf('%s does not exist \n', unit_name);
-        return
-    end
-end
+function [avg_sigma_force] = PlotForce(xds, event, unit_name, Force_Norm_Factor, force_YLims, Plot_Figs, Save_Figs)
 
 %% Extract the target directions & centers
 [target_dirs, target_centers] = Identify_Targets(xds);
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Event lengths
-before_event = 3;
-after_event = 3;
+gain_factor = 5; % 3; %
+
+% Pull the binning paramaters
+[Bin_Params] = Binning_Parameters;
+
+% Time before & after the event
+before_event = Bin_Params.before_event;
+after_event = Bin_Params.after_event;
 
 % Window to calculate max firing rate
-window_size = 0.1;
+half_window_length = Bin_Params.half_window_length; % Time (sec.)
 
 if ~contains(event, 'window')
     max_fr_time = 0;
@@ -45,7 +26,11 @@ if contains(event, 'gocue') || contains(event, 'force_onset')
     time_before_gocue = 0.4;
 elseif contains(event, 'end')
     % Define the window for the movement phase
-    time_before_end = xds.meta.TgtHold;
+    try
+        time_before_end = xds.meta.TgtHold;
+    catch
+        time_before_end = NaN;
+    end
 end
 
 % Font & figure specifications
@@ -60,7 +45,7 @@ figure_height = 250;
 num_dirs = length(target_dirs);
 
 % Define the output variable
-avg_z_force = struct([]);
+avg_sigma_force = struct([]);
 
 %% Begin the loop through all directions
 for jj = 1:num_dirs
@@ -74,7 +59,7 @@ for jj = 1:num_dirs
 
     if contains(event, 'window')
         % Run the preferred direction window function
-        [~, max_fr_time, ~] = ...
+        [~, max_fr_time] = ...
         EventWindow(xds, unit_name, target_dirs(jj), target_centers(jj), event);
     end
 
@@ -98,38 +83,34 @@ for jj = 1:num_dirs
         end
     else
         for ii = 1:length(Alignment_Times)
-            Force{ii,1} = Force{ii,1} / 1000*5; % Millivolt conversion * gain
+            Force{ii,1} = Force{ii,1} / 1000*gain_factor; % Millivolt conversion * gain
         end
     end
 
     %% Sum the two force transducers
-    z_Force = struct([]);
-    % Loops through force
-    for ii = 1:length(Alignment_Times)
-        z_Force{ii,1} = Force{ii,1}(:, 2) + Force{ii, 1}(:, 1);
+    [Sigma_Force] = Sum_Force(xds.meta.task, Force);
+
+    %% Put all the recomposed force info in a single matrix
+    all_Sigma_Force = zeros(length(Sigma_Force{1,1}), length(Sigma_Force));
+    for ii = 1:length(Sigma_Force)
+        all_Sigma_Force(:,ii) = Sigma_Force{ii,1}(:,1);
     end
 
-    %% Put all the recomposed cursor positions info in a single matrix
-    all_z_Force = zeros(length(z_Force{1,1}), length(z_Force));
-    for ii = 1:length(z_Force)
-        all_z_Force(:,ii) = z_Force{ii,1}(:,1);
+    %% Average the recomposed force info
+    avg_sigma_force{jj,1} = zeros(length(all_Sigma_Force),1);
+    for ii = 1:length(avg_sigma_force{jj,1})
+        avg_sigma_force{jj,1}(ii) = mean(all_Sigma_Force(ii,:));
     end
 
-    %% Average the recomposed cursor positions info
-    avg_z_force{jj,1} = zeros(length(all_z_Force),1);
-    for ii = 1:length(avg_z_force{jj,1})
-        avg_z_force{jj,1}(ii) = mean(all_z_Force(ii,:));
-    end
+    %% Find the standard dev of the recomposed force info
 
-    %% Find the standard dev of the recomposed cursor position info
-
-    std_z_force = zeros(length(all_z_Force),1);
-    for ii = 1:length(avg_z_force{jj,1})
-        std_z_force(ii) = std(all_z_Force(ii,:));
+    std_z_force = zeros(length(all_Sigma_Force),1);
+    for ii = 1:length(avg_sigma_force{jj,1})
+        std_z_force(ii) = std(all_Sigma_Force(ii,:));
     end
 
     %% Define the absolute timing
-    absolute_timing = linspace(-before_event, after_event, length(z_Force{1,1}));
+    absolute_timing = linspace(-before_event, after_event, length(Sigma_Force{1,1}));
     
     %% Plot the average and standard deviation cursor position
 
@@ -140,11 +121,11 @@ for jj = 1:num_dirs
         hold on
         
         % Average
-        plot(absolute_timing, avg_z_force{jj,1}, 'k', 'LineWidth', 2)
+        plot(absolute_timing, avg_sigma_force{jj,1}, 'k', 'LineWidth', 2)
         % Standard Dev
-        plot(absolute_timing, avg_z_force{jj,1} + std_z_force, ...
+        plot(absolute_timing, avg_sigma_force{jj,1} + std_z_force, ...
             'LineWidth', 1, 'LineStyle', '--', 'Color', 'r')
-        plot(absolute_timing, avg_z_force{jj,1} - std_z_force, ...
+        plot(absolute_timing, avg_sigma_force{jj,1} - std_z_force, ...
             'LineWidth', 1, 'LineStyle', '--', 'Color', 'r')
         
         % Setting the x-axis limits
@@ -176,10 +157,10 @@ for jj = 1:num_dirs
     
         if contains(event, 'window')
             % Dotted purple line indicating beginning of measured window
-            line([max_fr_time - window_size, max_fr_time - window_size], ... 
+            line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
                 [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
             % Dotted purple line indicating end of measured window
-            line([max_fr_time + window_size, max_fr_time + window_size], ... 
+            line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
                 [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
         elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
             % Dotted red line indicating beginning of measured window

@@ -22,9 +22,12 @@ time_before_gocue = 0.4;
 % Define the window for the movement phase
 time_before_end = xds_morn.meta.TgtHold;
 
-% Times displayed in the raster
-before_event = 3.0;
-after_event = 3.0;
+% Pull the binning paramaters
+[Bin_Params] = Binning_Parameters;
+
+% Time before & after the event
+before_event = Bin_Params.before_event;
+after_event = Bin_Params.after_event;
 
 % Font & figure specifications
 label_font_size = 15;

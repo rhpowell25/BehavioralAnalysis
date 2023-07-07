@@ -176,8 +176,9 @@ for jj = 1:num_dirs
         STD_Noon_TgtHold_EMG(ii, jj) = std(per_trial_avg_end_EMG_noon(:,ii));
         Err_Noon_TgtHold_EMG(ii, jj) =  STD_Noon_TgtHold_EMG(ii, jj) / sqrt(length(per_trial_avg_end_EMG_noon(:,ii)));
         % EMG percent change
-        TgtHold_EMG_perc_changes(ii, jj) = ...
-            (Noon_TgtHold_EMG(ii, jj) - Morn_TgtHold_EMG(ii, jj)) / abs(Morn_TgtHold_EMG(ii, jj));
+        TgtHold_EMG_perc_changes(ii, jj) = Cohen_D(per_trial_avg_end_EMG_morn(:,ii), per_trial_avg_end_EMG_noon(:,ii));
+        %TgtHold_EMG_perc_changes(ii, jj) = ...
+        %    (Noon_TgtHold_EMG(ii, jj) - Morn_TgtHold_EMG(ii, jj)) / abs(Morn_TgtHold_EMG(ii, jj));
     end
 
     %% Plot the target hold EMG

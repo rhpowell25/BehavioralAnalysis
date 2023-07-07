@@ -83,55 +83,42 @@ for jj = 1:num_dirs
         rewarded_end_idx_noon(ii) = find(xds_noon.time_frame == rewarded_end_time_noon(ii));
     end
     
-    aligned_end_Force_morn = struct([]); % Force during each successful trial
-    aligned_end_Force_timing_morn = struct([]); % Time points during each succesful trial
+    Force_morn = struct([]); % Force during each successful trial
+    timing_morn = struct([]); % Time points during each succesful trial
     for ii = 1:length(rewarded_end_time_morn)
-        aligned_end_Force_morn{ii, 1} = xds_morn.force((rewarded_end_idx_morn(ii) - (TgtHold_time / xds_morn.bin_width) : ...
+        Force_morn{ii, 1} = xds_morn.force((rewarded_end_idx_morn(ii) - (TgtHold_time / xds_morn.bin_width) : ...
             rewarded_end_idx_morn(ii)), :);
-        aligned_end_Force_timing_morn{ii, 1} = xds_morn.time_frame((rewarded_end_idx_morn(ii) - ... 
+        timing_morn{ii, 1} = xds_morn.time_frame((rewarded_end_idx_morn(ii) - ... 
             (TgtHold_time / xds_morn.bin_width) : rewarded_end_idx_morn(ii)));
     end
 
-    aligned_end_Force_noon = struct([]); % Force during each successful trial
-    aligned_end_Force_timing_noon = struct([]); % Time points during each succesful trial
+    Force_noon = struct([]); % Force during each successful trial
+    Force_timing_noon = struct([]); % Time points during each succesful trial
     for ii = 1:length(rewarded_end_time_noon)
-        aligned_end_Force_noon{ii, 1} = xds_noon.force((rewarded_end_idx_noon(ii) - (TgtHold_time / xds_noon.bin_width) : ...
+        Force_noon{ii, 1} = xds_noon.force((rewarded_end_idx_noon(ii) - (TgtHold_time / xds_noon.bin_width) : ...
             rewarded_end_idx_noon(ii)), :);
-        aligned_end_Force_timing_noon{ii, 1} = xds_noon.time_frame((rewarded_end_idx_noon(ii) - ... 
+        Force_timing_noon{ii, 1} = xds_noon.time_frame((rewarded_end_idx_noon(ii) - ... 
             (TgtHold_time / xds_noon.bin_width) : rewarded_end_idx_noon(ii)));
     end
     
     % Finding the absolute timing
-    absolute_end_Force_timing_morn = aligned_end_Force_timing_morn{1,1} - rewarded_end_time_morn(1);
-    absolute_end_Force_timing_noon = aligned_end_Force_timing_noon{1,1} - rewarded_end_time_noon(1);
+    absolute_end_Force_timing_morn = timing_morn{1,1} - rewarded_end_time_morn(1);
+    absolute_end_Force_timing_noon = Force_timing_noon{1,1} - rewarded_end_time_noon(1);
 
-    %% Convert to a single direction of force
-    z_Force_morn = struct([]);
-    % Loops through force
-    for ii = 1:length(rewarded_end_time_morn)
-        if isequal(xds_morn.meta.task, 'multi_gadget')
-            z_Force_morn{ii,1} = aligned_end_Force_morn{ii,1}(:, 2) + aligned_end_Force_morn{ii, 1}(:, 1);
-        end
-    end
-
-    z_Force_noon = struct([]);
-    % Loops through force
-    for ii = 1:length(rewarded_end_time_noon)
-        if isequal(xds_noon.meta.task, 'multi_gadget')
-            z_Force_noon{ii,1} = aligned_end_Force_noon{ii,1}(:, 2) + aligned_end_Force_noon{ii, 1}(:, 1);
-        end
-    end
+    %% Recompose the force
+    [Sigma_Force_morn] = Sum_Force(xds_morn.meta.task, Force_morn);
+    [Sigma_Force_noon] = Sum_Force(xds_noon.meta.task, Force_noon);
 
     %% Putting all succesful trials in one array
     
-    all_trials_end_Force_morn = zeros(length(aligned_end_Force_morn{1,1}), length(rewarded_end_time_morn));
+    all_trials_end_Force_morn = zeros(length(Force_morn{1,1}), length(rewarded_end_time_morn));
     for ii = 1:length(rewarded_end_time_morn)
-        all_trials_end_Force_morn(:,ii) = z_Force_morn{ii, 1};
+        all_trials_end_Force_morn(:,ii) = Sigma_Force_morn{ii, 1};
     end
 
-    all_trials_end_Force_noon = zeros(length(aligned_end_Force_noon{1,1}), length(rewarded_end_time_noon));
+    all_trials_end_Force_noon = zeros(length(Force_noon{1,1}), length(rewarded_end_time_noon));
     for ii = 1:length(rewarded_end_time_noon)
-        all_trials_end_Force_noon(:,ii) = z_Force_noon{ii, 1};
+        all_trials_end_Force_noon(:,ii) = Sigma_Force_noon{ii, 1};
     end
 
     %% Normalizing the average force
@@ -146,22 +133,22 @@ for jj = 1:num_dirs
     end
 
     %% Calculating average Force (Average per trial)
-    per_trial_avg_end_Force_morn = zeros(length(aligned_end_Force_morn), 1);
-    per_trial_avg_end_Force_noon = zeros(length(aligned_end_Force_noon), 1);
-    for ii = 1:length(aligned_end_Force_morn)
+    per_trial_avg_end_Force_morn = zeros(length(Force_morn), 1);
+    per_trial_avg_end_Force_noon = zeros(length(Force_noon), 1);
+    for ii = 1:length(Force_morn)
         per_trial_avg_end_Force_morn(ii,1) = mean(all_trials_end_Force_morn(:,ii));
     end
-    for ii = 1:length(aligned_end_Force_noon)
+    for ii = 1:length(Force_noon)
         per_trial_avg_end_Force_noon(ii,1) = mean(all_trials_end_Force_noon(:,ii));
     end
     
     %% Calculating average Force (Average Across trials)
-    cross_trial_avg_end_Force_morn = zeros(length(aligned_end_Force_morn), 1);
-    cross_trial_avg_end_Force_noon = zeros(length(aligned_end_Force_noon), 1);
-    for ii = 1:length(aligned_end_Force_morn{1,1})
+    cross_trial_avg_end_Force_morn = zeros(length(Force_morn), 1);
+    cross_trial_avg_end_Force_noon = zeros(length(Force_noon), 1);
+    for ii = 1:length(Force_morn{1,1})
         cross_trial_avg_end_Force_morn(ii,1) = mean(all_trials_end_Force_morn(ii,:));
     end
-    for ii = 1:length(aligned_end_Force_noon{1,1})
+    for ii = 1:length(Force_noon{1,1})
         cross_trial_avg_end_Force_noon(ii,1) = mean(all_trials_end_Force_noon(ii,:));
     end
 

@@ -1,8 +1,28 @@
-function Per_Trial_CursorPos(xds, event, unit_name, cursor_pos_YLims, Save_Figs)
+function Per_Trial_CursorSignal(xds, signal_choice, event, unit_name, cursor_YLims, Save_Figs)
+
+%% File Description:
+
+% This function plots the trial-by-trial cursor position, velocity, or 
+% acceleration per target direction / distance of all the succesful trials 
+% in an xds file.
+% If you set Save_Figs to 0, the figure will not be saved to your desktop.
+%
+% -- Inputs --
+% xds: the xds file
+% signal_choice: 'Pos', 'Vel', or 'Acc'
+% event: 'trial_gocue', 'window_trial_gocue', 'trial_end', 
+% 'window_trial_end', 'force_onset', 'window_force_onset', 'force_max', 
+% 'window_force_max', 'window_force_deriv', 'force_deriv', 'cursor_onset', 
+% 'window_cursor_onset', 'cursor_veloc', 'window_cursor_veloc', 
+% 'cursor_acc', 'window_cursor_acc', 'EMG_max', 'window_EMG_max', 
+% 'task_onset', or 'window_task_onset'
+% unit_name: 'elec1_1', #, or NaN
+% cursor_YLims: [ymax, ymin]
+% Save_Figs: 'pdf', 'png', 'fig', or 0
 
 %% End the function if there is no Y-Limit
 
-if isnan(cursor_pos_YLims)
+if isnan(cursor_YLims)
     disp("There is no Y-Limit")
     return
 end
@@ -12,12 +32,15 @@ end
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Event lengths
-before_event = 3;
-after_event = 3;
+% Pull the binning paramaters
+[Bin_Params] = Binning_Parameters;
+
+% Time before & after the event
+before_event = Bin_Params.before_event;
+after_event = Bin_Params.after_event;
 
 % Window to calculate max firing rate
-window_size = 0.1;
+half_window_length = Bin_Params.half_window_length; % Time (sec.)
 
 if ~contains(event, 'window')
     max_fr_time = 0;
@@ -31,10 +54,23 @@ elseif contains(event, 'end')
     time_before_end = xds.meta.TgtHold;
 end
 
+% Extract the cursor signal of chhoice
+if strcmp(signal_choice, 'Pos')
+    curs_sig = xds.curs_p;
+elseif strcmp(signal_choice, 'Vel')
+    curs_sig = xds.curs_v;
+elseif strcmp(signal_choice, 'Acc')
+    curs_sig = xds.curs_a;
+end
+
 % Font specifications
 label_font_size = 12;
 title_font_size = 13;
+axes_line_size = 1;
 plot_line_size = 3;
+font_name = 'Arial';
+figure_width = 600;
+figure_height = 600;
 
 %% Indexes for rewarded trials in all directions
 % Counts the number of directions used
@@ -56,7 +92,7 @@ for jj = 1:num_dirs
 
     if contains(event, 'window')
         % Run the preferred direction window function
-        [~, max_fr_time, ~] = ...
+        [~, max_fr_time] = ...
         EventWindow(xds, unit_name, target_dirs(jj), target_centers(jj), event);
     end
     
@@ -65,11 +101,12 @@ for jj = 1:num_dirs
     gocue_to_event = Alignment_Times - rewarded_gocue_time;
     event_to_end = rewarded_end_time - Alignment_Times;
 
-    %% Extracting cursor position & time during successful trials
+    %% Extracting cursor signal & time during successful trials
 
-    % Cursor position & time measured during each successful trial 
-    cursor_p = struct([]); % Cursor position during each successful trial
-    timings = struct([]); % Time points during each succesful trial 
+    % Cursor signal & time measured during each successful trial 
+    rewarded_curs_sig = struct([]);
+    % Time points during each succesful trial
+    timings = struct([]); 
     for ii = 1:length(Alignment_Times)
         temp_start = 0;
         alignment_idx = find(xds.time_frame == Alignment_Times(ii));
@@ -79,39 +116,40 @@ for jj = 1:num_dirs
             alignment_start_idx = 1;
         end
         alignment_end_idx = alignment_idx + (after_event / xds.bin_width);
-        cursor_p{ii,1} = xds.curs_p(alignment_start_idx : alignment_end_idx, :);
+        rewarded_curs_sig{ii,1} = curs_sig(alignment_start_idx : alignment_end_idx, :);
         timings{ii, 1} = xds.time_frame(alignment_start_idx : alignment_end_idx);
         if temp_start ~= 0
-            cursor_p{ii,1} = cat(1, NaN(abs(temp_start) + 1, width(cursor_p{ii})), cursor_p{ii,1});
+            rewarded_curs_sig{ii,1} = cat(1, NaN(abs(temp_start) + 1, width(rewarded_curs_sig{ii})), rewarded_curs_sig{ii,1});
             timings{ii,1} = cat(1, NaN(abs(temp_start) + 1, 1), timings{ii,1});
         end
     end
 
-    %% Find the vector sum of the cursor position
+    %% Find the vector sum of the cursor signal
 
-    z_cursor_p = struct([]);
+    z_cur_sig = struct([]);
     for ii = 1:length(rewarded_gocue_time)
-        z_cursor_p{ii,1} = zeros(length(cursor_p{ii,1}(:,1)),1);
-        for dd = 1:length(z_cursor_p{ii,1})
-            z_cursor_p{ii,1}(dd,1) = sqrt(cursor_p{ii,1}(dd,1).^2 + cursor_p{ii,1}(dd,2).^2);
+        z_cur_sig{ii,1} = zeros(length(rewarded_curs_sig{ii,1}(:,1)),1);
+        for dd = 1:length(z_cur_sig{ii,1})
+            z_cur_sig{ii,1}(dd,1) = sqrt(rewarded_curs_sig{ii,1}(dd,1).^2 + rewarded_curs_sig{ii,1}(dd,2).^2);
         end
     end
 
     %% Define the absolute timing
-    absolute_timing = linspace(-before_event, after_event, length(cursor_p{1,1}));
+    absolute_timing = linspace(-before_event, after_event, length(rewarded_curs_sig{1,1}));
 
-    %% Plot the decomposed individual cursor positions on the top
+    %% Plot the decomposed individual cursor signals on the top
 
-    figure
-    subplot(211);
+    Cursor_figure = figure;
+    Cursor_figure.Position = [300 150 figure_width figure_height];
+    tiledlayout(2,1);
+    nexttile
     hold on
     for ii = 1:length(rewarded_gocue_time)
-
-        plot(absolute_timing, cursor_p{ii,1}(:,1), 'b', 'LineWidth',.2, 'LineStyle','--')
-        plot(absolute_timing, cursor_p{ii,1}(:,2), 'g', 'LineWidth',.2, 'LineStyle','--')
+        plot(absolute_timing, rewarded_curs_sig{ii,1}(:,1), 'b', 'LineWidth',.2, 'LineStyle','--')
+        plot(absolute_timing, rewarded_curs_sig{ii,1}(:,2), 'g', 'LineWidth',.2, 'LineStyle','--')
     end
     
-    % Setting the x-axis limits
+    % Setting the axis limits
     if contains(event, 'gocue')
         xlim([-before_event + 2, after_event]);
     elseif contains(event, 'end')
@@ -119,7 +157,7 @@ for jj = 1:num_dirs
     else
         xlim([-before_event + 1, after_event - 1]);
     end
-    ylim([cursor_pos_YLims(2), cursor_pos_YLims(1)]);
+    ylim([cursor_YLims(2), cursor_YLims(1)]);
     ylims = ylim;
     
     if contains(event, 'gocue')
@@ -140,10 +178,10 @@ for jj = 1:num_dirs
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
-        line([max_fr_time - window_size, max_fr_time - window_size], ... 
+        line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
-        line([max_fr_time + window_size, max_fr_time + window_size], ... 
+        line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window
@@ -154,35 +192,55 @@ for jj = 1:num_dirs
             'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
     end
     
+    % Define the labels
+    if strcmp(signal_choice, 'Pos')
+        signal_label = 'Wrist Position';
+    elseif strcmp(signal_choice, 'Vel')
+        signal_label = 'Wrist Velocity';
+    elseif strcmp(signal_choice, 'Acc')
+        signal_label = 'Wrist Acceleration';
+    end
+
     % Labeling the axis
-    ylabel('Wrist Position', 'FontSize', label_font_size);
-    xlabel('Time (sec.)', 'FontSize', label_font_size);
+    ylabel(signal_label, 'FontSize', label_font_size);
     
     % Titling the top plot
-    title(sprintf('Decomposed wrist position: %i°, TgtCenter at %0.1f', ... 
-        target_dirs(jj), target_centers(jj)), 'FontSize', title_font_size)
+    title(sprintf('%s: %i°, TgtCenter at %0.1f', ... 
+        signal_label, target_dirs(jj), target_centers(jj)), 'FontSize', title_font_size)
 
-    %% Plot the individual cursor positions on the bottom
+    % Remove x-axis ticks
+    figure_axes = gca;
+    figure_axes.LineWidth = axes_line_size;
+    x_labels = string(figure_axes.XAxis.TickLabels);
+    x_labels(1:end) = NaN;
+    figure_axes.XAxis.TickLabels = x_labels;
+    % Set ticks to outside
+    set(gca,'TickDir','out');
+    % Remove the top and right tick marks
+    set(gca,'box','off')
+    % Set The Font
+    set(figure_axes,'FontName', font_name);
 
-    subplot(212);
+    %% Plot the individual cursor signals on the bottom
+
+    nexttile
     hold on
     for ii = 1:length(rewarded_gocue_time)
-        plot(absolute_timing, z_cursor_p{ii,1}, 'k', 'LineWidth',.2, 'LineStyle','--')
+        plot(absolute_timing, z_cur_sig{ii,1}, 'LineWidth',.2)
     end
     
     for ii = 1:length(rewarded_gocue_time)
         cursor_gocue_idx = timings{ii,1} == rewarded_gocue_time(ii);
         cursor_end_idx = timings{ii,1} == rewarded_end_time(ii);
         % Plot the go-cues as dark green dots
-        plot(-gocue_to_event(ii), z_cursor_p{ii,1}(cursor_gocue_idx), ...
+        plot(-gocue_to_event(ii), z_cur_sig{ii,1}(cursor_gocue_idx), ...
             'Marker', '.', 'Color', [0 0.5 0], 'Markersize', 15);
         % Plot the trial ends as red dots
-        plot(event_to_end(ii), z_cursor_p{ii,1}(cursor_end_idx), ...
+        plot(event_to_end(ii), z_cur_sig{ii,1}(cursor_end_idx), ...
             'Marker', '.', 'Color', 'r', 'Markersize', 15);
-
     end
     
-    % Setting the x-axis limits
+    % Setting the axis limits
     if contains(event, 'gocue')
         xlim([-before_event + 2, after_event]);
     elseif contains(event, 'end')
@@ -190,7 +248,7 @@ for jj = 1:num_dirs
     else
         xlim([-before_event + 1, after_event - 1]);
     end
-    ylim([-1, cursor_pos_YLims(1)]);
+    ylim([-1, cursor_YLims(1)]);
     ylims = ylim;
     
     if contains(event, 'gocue')
@@ -211,10 +269,10 @@ for jj = 1:num_dirs
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
-        line([max_fr_time - window_size, max_fr_time - window_size], ... 
+        line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
-        line([max_fr_time + window_size, max_fr_time + window_size], ... 
+        line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window
@@ -226,12 +284,21 @@ for jj = 1:num_dirs
     end
     
     % Labeling the axis
-    ylabel('Wrist Position', 'FontSize', label_font_size);
+    ylabel(signal_label, 'FontSize', label_font_size);
     xlabel('Time (sec.)', 'FontSize', label_font_size);
-    
-    % Titling the top plot
-    title(sprintf('Wrist position: %i°, TgtCenter at %0.1f', ... 
-        target_dirs(jj), target_centers(jj)), 'FontSize', title_font_size)
+
+    % Only label every other tick
+    figure_axes = gca;
+    figure_axes.LineWidth = axes_line_size;
+    x_labels = string(figure_axes.XAxis.TickLabels);
+    x_labels(2:2:end) = NaN;
+    figure_axes.XAxis.TickLabels = x_labels;
+    % Set ticks to outside
+    set(gca,'TickDir','out');
+    % Remove the top and right tick marks
+    set(gca,'box','off')
+    % Set The Font
+    set(figure_axes,'FontName', font_name);
 
     % End the event after one loop if showing baseline firing rate
     if strcmp(event, 'trial_gocue')

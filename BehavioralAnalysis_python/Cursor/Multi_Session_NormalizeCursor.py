@@ -1,20 +1,68 @@
-# -*- coding: utf-8 -*-
+#%% Import basic packages
 import numpy as np
 import math
-
-class MultiSession_NormalizeCursor():
     
-    def Multi_Session_Normalize_Cursor(xds_morn, xds_noon, muscle_groups, norm_perctile, norm_cursor):
-        
-        #%% End the function if you are not normalizing the EMG
-        if norm_cursor == 0:
-            print('Cursor Position Will Not Be Normalized')
-            Cursor_Norm_Factor = 1
-            return Cursor_Norm_Factor
-        else:
-            print('Cursor Will Be Normalized to the ' + str(norm_perctile) + 'th percentile')
+#%% File Description:
 
-        #%% Concatenate all the morning & afternoon information
+# This function finds the nth percentile of cursor position, velocity, or 
+# acceleration between two XDS files for the purpose of normalization.
+# Depending on the method, the nth percentile will be calculated using
+# the entirety of both files or using only the succesful trials.
+# If you set norm_cursor to 0, the Cursor_Norm_Factor will be 1
+#
+# -- Inputs --
+# xds_morn: the first xds file
+# xds_noon: the second xds file
+# signal_choice: 'Pos', 'Vel', or 'Acc'
+# norm_cursor: 1 or 0
+
+def Multi_Session_NormalizeCursor(xds_morn, xds_noon, signal_choice, norm_cursor):
+    
+    #%% End the function if you are not normalizing the EMG
+    if norm_cursor == 0:
+        print('Cursor Signal Will Not Be Normalized')
+        Cursor_Norm_Factor = 1
+        return Cursor_Norm_Factor
+    else:
+        norm_prctile = 95
+        print('Cursor Signal Will Be Normalized to the ' + str(norm_prctile) + 'th percentile')
+
+    #%% What part of the cursor signal do you want to take the percentile of
+    # All the cursor data ('All_Cursor')
+    # The cursor in each succesful trial ('Trial_Cursor')
+    norm_method = 'Trial_Cursor'
+    
+    #%% Basic Settings, some variable extractions, & definitions
+
+    # Extract the cursor signal of chhoice
+    if signal_choice == 'Pos':
+        curs_morn = xds_morn.curs_p
+        curs_noon = xds_noon.curs_p
+    elif signal_choice == 'Vel':
+        curs_morn = xds_morn.curs_v
+        curs_noon = xds_noon.curs_v
+    elif signal_choice == 'Acc':
+        curs_morn = xds_morn.curs_a
+        curs_noon = xds_noon.curs_a
+    
+    #%% Concatenate the cursor signal
+    
+    cat_curs = np.concatenate((curs_morn, curs_noon), axis = 0)
+    
+    #%% Find the vector sum of the cursor signal
+    z_cat_curs = np.zeros(len(cat_curs))
+    for ii in range(len(z_cat_curs)):
+        z_cat_curs[ii] = math.sqrt(cat_curs[ii,0]**2 + cat_curs[ii,1]**2)
+        
+    #%% Finding the max cursor signal throughout both files
+    
+    if norm_method == 'All_Cursor':
+        
+        # Find the nth percentile of the cursor signal
+        Cursor_Norm_Factor = np.percentile(z_cat_curs, norm_prctile)
+
+    #%% Concatenate all the morning & afternoon information
+    if norm_method == 'Trial_Cursor':
         
         # Time frame
         noon_time_frame = xds_noon.time_frame + xds_morn.time_frame[-1]
@@ -22,9 +70,6 @@ class MultiSession_NormalizeCursor():
         
         # Bin width
         bin_width = xds_morn.bin_width
-        
-        # Cursor
-        cat_Cursor = np.concatenate((xds_morn.curs_p, xds_noon.curs_p), axis = 0)
         
         # Trial results
         trial_results = np.concatenate((xds_morn.trial_result, xds_noon.trial_result), axis = 0)
@@ -75,36 +120,27 @@ class MultiSession_NormalizeCursor():
             timings[ii] = time_frame[int(rewarded_start_idx[ii]) : 
                  int(rewarded_end_idx[ii] + (2/bin_width))]
             
-        #%% Pull the cursor position corresponding to the extracted time frames
+        #%% Pull the cursor signal corresponding to the extracted time frames
         
-        # Pull all the cursor position
-        cursor_p = [[] for ii in range(len(total_rewarded_idx))]
+        # Cursor signal measured during each successful trial
+        rewarded_curs_sig = [[] for ii in range(len(total_rewarded_idx))]
         for ii in range(len(total_rewarded_idx)):
-            if rewarded_end_idx[ii] + (2/bin_width) > len(cat_Cursor):
-                cursor_p[ii] = cat_Cursor[int(rewarded_start_idx[ii]) : -1, :]
+            if rewarded_end_idx[ii] + (2/bin_width) > len(z_cat_curs):
+                rewarded_curs_sig[ii] = z_cat_curs[int(rewarded_start_idx[ii]) : -1]
             else:
-                cursor_p[ii] = cat_Cursor[int(rewarded_start_idx[ii]) : int(rewarded_start_idx[ii] + (2/bin_width)), :]
-         
-        #%% Recompose the cursor position
+                rewarded_curs_sig[ii] = z_cat_curs[int(rewarded_start_idx[ii]) : int(rewarded_start_idx[ii] + (2/bin_width))]
+                
+        #%% Finding the max cursor signal per trial
         
-        z_Cursor = [[] for ii in range(len(total_rewarded_idx))]
-        # Loops through cursor position
+        max_curs_pertrial = np.zeros(len(total_rewarded_idx))
         for ii in range(len(total_rewarded_idx)):
-            z_Cursor[ii] = np.zeros(len(cursor_p[ii]))
-            for dd in range(len(z_Cursor[ii])):
-                z_Cursor[ii][dd] = math.sqrt(cursor_p[ii][dd][0]**2 + cursor_p[ii][dd][1]**2)
-                        
-        #%% Finding the max cursor position per trial
-        
-        max_Cursor_pertrial = np.zeros(len(total_rewarded_idx))
-        for ii in range(len(total_rewarded_idx)):
-            max_Cursor_pertrial[ii] = max(z_Cursor[ii])
+            max_curs_pertrial[ii] = max(rewarded_curs_sig[ii])
                 
         #%% Find the 95th percentile of the max's
-        Cursor_Norm_Factor = np.percentile(max_Cursor_pertrial, norm_perctile)
-    
-    
-        return Cursor_Norm_Factor
+        Cursor_Norm_Factor = np.percentile(max_curs_pertrial, norm_prctile)
+
+
+    return Cursor_Norm_Factor
                     
                     
                     

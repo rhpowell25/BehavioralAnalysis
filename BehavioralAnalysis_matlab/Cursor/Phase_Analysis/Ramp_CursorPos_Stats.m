@@ -1,16 +1,23 @@
-function [Ramp_Force_p_values, Ramp_Force_perc_changes, ...
-    Morn_Ramp_Force, Err_Morn_Ramp_Force, Noon_Ramp_Force, Err_Noon_Ramp_Force] = ...
-    Ramp_Force_Stats(xds_morn, xds_noon, norm_force, Plot_Figs, Save_Figs)
+function [Ramp_CursorPos_p_values, Ramp_CursorPos_perc_changes, ...
+    Morn_Ramp_CursorPos, Err_Morn_Ramp_CursorPos, Noon_Ramp_CursorPos, Err_Noon_Ramp_CursorPos] = ...
+    Ramp_CursorPos_Stats(xds_morn, xds_noon, norm_cursor, Plot_Figs, Save_Figs)
+
+%% File Description:
+
+% This function finds changes in cursor position during the ramp phase 
+% between two XDS files & plots a boxplot & individual trial traces.
+% If you set Plot_Figs to 0, the figure will not be plotted.
+% If you set Save_Figs to 0, the figure will not be saved to your desktop.
+%
+% -- Inputs --
+% xds_morn: the first xds file
+% xds_noon: the second xds file
+% Cursor_Norm_Factor: the factor to normalize the cursor position
+% Plot_Figs: 1 or 0
+% Save_Figs: 'pdf', 'png', 'fig', or 0
 
 %% Display the function being used
-disp('Ramp Force Statistics:');
-
-%% Ending the function if there is no force
-
-if strcmp(xds_morn.meta.task, 'WS')
-    disp('Event cannot be force related for this task');
-    return
-end
+disp('Ramp Cursor Position Statistics:');
 
 %% Basic Settings, some variable extractions, & definitions
 
@@ -18,12 +25,6 @@ end
 legend_font_size = 12;
 title_font_size = 15;
 font_name = 'Arial';
-
-% Save Counter
-if ~isequal(Save_Figs, 0)
-    close all
-    save_title = strings;
-end
 
 % Define the window for the baseline phase
 TgtHold_time = xds_morn.meta.TgtHold;
@@ -52,6 +53,12 @@ end
 % Counts the number of directions used
 num_dirs = length(target_dirs_morn);
 
+% Save Counter
+if ~isequal(Save_Figs, 0)
+    close all
+    save_title = strings;
+end
+
 %% Begin the loop through all directions
 for jj = 1:num_dirs
 
@@ -61,6 +68,7 @@ for jj = 1:num_dirs
     rewarded_end_time_morn = rewarded_end_time_morn - TgtHold_time;
     % Round to match the neural bin size
     rewarded_end_time_morn = round(rewarded_end_time_morn, abs(floor(log10(xds_morn.bin_width))));
+
     [rewarded_onset_time_noon] = EventAlignmentTimes(xds_noon, target_dirs_noon(jj), target_centers_noon(jj), 'task_onset');
     [rewarded_end_time_noon] = EventAlignmentTimes(xds_noon, target_dirs_noon(jj), target_centers_noon(jj), 'trial_end');
     rewarded_end_time_noon = rewarded_end_time_noon - TgtHold_time;
@@ -69,17 +77,17 @@ for jj = 1:num_dirs
     
     %% Define the output variables
     if jj == 1
-        Morn_Ramp_Force = zeros(1, num_dirs);
-        STD_Morn_TgtHold_Force = zeros(1, num_dirs);
-        Err_Morn_Ramp_Force = zeros(1, num_dirs);
-        Noon_Ramp_Force = zeros(1, num_dirs);
-        STD_Noon_TgtHold_Force = zeros(1, num_dirs);
-        Err_Noon_Ramp_Force = zeros(1, num_dirs);
-        Ramp_Force_p_values = zeros(1, num_dirs);
-        Ramp_Force_perc_changes = zeros(1, num_dirs);
+        Morn_Ramp_CursorPos = zeros(1, num_dirs);
+        STD_Morn_TgtHold_cursor_p = zeros(1, num_dirs);
+        Err_Morn_Ramp_CursorPos = zeros(1, num_dirs);
+        Noon_Ramp_CursorPos = zeros(1, num_dirs);
+        STD_Noon_TgtHold_cursor_p = zeros(1, num_dirs);
+        Err_Noon_Ramp_CursorPos = zeros(1, num_dirs);
+        Ramp_CursorPos_p_values = zeros(1, num_dirs);
+        Ramp_CursorPos_perc_changes = zeros(1, num_dirs);
     end
 
-    %% Force and time aligned to specified event
+    %% Cursor position aligned to specified event
     % Find the rewarded times in the whole trial time frame
     rewarded_start_idx_morn = zeros(height(rewarded_onset_time_morn),1);
     for ii = 1:length(rewarded_onset_time_morn)
@@ -101,93 +109,87 @@ for jj = 1:num_dirs
         rewarded_end_idx_noon(ii) = find(xds_noon.time_frame == rewarded_end_time_noon(ii));
     end
     
-    Force_morn = struct([]); % Force during each successful trial
-    Force_timing_morn = struct([]); % Time points during each succesful trial
+    % Cursor position during each succesful trial
+    cursor_p_morn = struct([]);
     for ii = 1:length(rewarded_end_time_morn)
-        Force_morn{ii, 1} = xds_morn.force(rewarded_start_idx_morn(ii) : rewarded_end_idx_morn(ii), :);
-        Force_timing_morn{ii, 1} = xds_morn.time_frame(rewarded_start_idx_morn(ii) : rewarded_end_idx_morn(ii));
+        cursor_p_morn{ii, 1} = xds_morn.curs_p(rewarded_start_idx_morn(ii) : rewarded_end_idx_morn(ii), :);
     end
 
-    Force_noon = struct([]); % Force during each successful trial
-    Force_timing_noon = struct([]); % Time points during each succesful trial
+    % Cursor position during each succesful trial
+    cursor_p_noon = struct([]);
     for ii = 1:length(rewarded_end_time_noon)
-        Force_noon{ii, 1} = xds_noon.force(rewarded_start_idx_noon(ii) : rewarded_end_idx_noon(ii), :);
-        Force_timing_noon{ii, 1} = xds_noon.time_frame(rewarded_start_idx_noon(ii) : rewarded_end_idx_noon(ii));
+        cursor_p_noon{ii, 1} = xds_noon.curs_p(rewarded_start_idx_noon(ii) : rewarded_end_idx_noon(ii), :);
     end
 
-    %% Recompose the force
-    [Sigma_Force_morn] = Sum_Force(xds_morn.meta.task, Force_morn);
-    [Sigma_Force_noon] = Sum_Force(xds_noon.meta.task, Force_noon);
-
-    %% Normalizing the average force
-
-    if isequal(norm_force, 1)
-        Force_Norm_Factor = Multi_Session_NormalizeForce(xds_morn, xds_noon, norm_force);
-        for ii = 1:length(Sigma_Force_morn)
-            Sigma_Force_morn{ii,1} = (Sigma_Force_morn{ii,1} / Force_Norm_Factor)*100;
-        end
-        for ii = 1:length(Sigma_Force_noon)
-            Sigma_Force_noon{ii,1} = (Sigma_Force_noon{ii,1} / Force_Norm_Factor)*100;
-        end
-    elseif strcmp(norm_force, 'Convert')
-        for ii = 1:length(Sigma_Force_morn)
-            Sigma_Force_morn{ii,1} = Sigma_Force_morn{ii,1} / 1000*5; % Millivolt conversion * gain
-        end
-        for ii = 1:length(Sigma_Force_noon)
-            Sigma_Force_noon{ii,1} = Sigma_Force_noon{ii,1} / 1000*5; % Millivolt conversion * gain
-        end
+    %% Find the vector sum of the cursor position
+    z_cursor_p_morn = struct([]);
+    for ii = 1:length(rewarded_onset_time_morn)
+        z_cursor_p_morn{ii,1} = sqrt(cursor_p_morn{ii,1}(:, 2).^2 + cursor_p_morn{ii, 1}(:, 1).^2);
     end
 
-    %% Calculating average Force (Average per trial)
-    per_trial_avg_end_Force_morn = zeros(length(Force_morn), 1);
-    per_trial_avg_end_Force_noon = zeros(length(Force_noon), 1);
-    for ii = 1:length(Sigma_Force_morn)
-        per_trial_avg_end_Force_morn(ii,1) = mean(Sigma_Force_morn{ii});
-    end
-    for ii = 1:length(Sigma_Force_noon)
-        per_trial_avg_end_Force_noon(ii,1) = mean(Sigma_Force_noon{ii});
+    z_cursor_p_noon = struct([]);
+    for ii = 1:length(rewarded_onset_time_noon)
+        z_cursor_p_noon{ii,1} = sqrt(cursor_p_noon{ii,1}(:, 2).^2 + cursor_p_noon{ii, 1}(:, 1).^2);
     end
 
-    %% Calculate the output variables
-    [~, Ramp_Force_p_values(1, jj)] = ttest2(per_trial_avg_end_Force_morn, per_trial_avg_end_Force_noon);
-    % Average Force
-    Morn_Ramp_Force(1, jj) = mean(per_trial_avg_end_Force_morn);
-    Noon_Ramp_Force(1, jj) = mean(per_trial_avg_end_Force_noon);
+    %% Normalizing the average cursor position
+
+    Cursor_Norm_Factor = Multi_Session_NormalizeCursor(xds_morn, xds_noon, norm_cursor);
+    for ii = 1:length(z_cursor_p_morn)
+        z_cursor_p_morn{ii,1} = (z_cursor_p_morn{ii,1} / Cursor_Norm_Factor)*100;
+    end
+    for ii = 1:length(z_cursor_p_noon)
+        z_cursor_p_noon{ii,1} = (z_cursor_p_noon{ii,1} / Cursor_Norm_Factor)*100;
+    end
+
+    %% Calculating average cursor position (Average per trial)
+    per_trial_avg_z_cursor_p_morn = zeros(length(cursor_p_morn), 1);
+    per_trial_avg_z_cursor_p_noon = zeros(length(cursor_p_noon), 1);
+    for ii = 1:length(z_cursor_p_morn)
+        per_trial_avg_z_cursor_p_morn(ii,1) = mean(z_cursor_p_morn{ii});
+    end
+    for ii = 1:length(z_cursor_p_noon)
+        per_trial_avg_z_cursor_p_noon(ii,1) = mean(z_cursor_p_noon{ii});
+    end
+
+    %% Do the statistics on the cursor position
+    [~, Ramp_CursorPos_p_values(1, jj)] = ttest2(per_trial_avg_z_cursor_p_morn, per_trial_avg_z_cursor_p_noon);
+    % Average cursor position
+    Morn_Ramp_CursorPos(1, jj) = mean(per_trial_avg_z_cursor_p_morn, 'omitnan');
+    Noon_Ramp_CursorPos(1, jj) = mean(per_trial_avg_z_cursor_p_noon, 'omitnan');
     % Standard deviation
-    STD_Morn_TgtHold_Force(1, jj) = std(per_trial_avg_end_Force_morn);
-    STD_Noon_TgtHold_Force(1, jj) = std(per_trial_avg_end_Force_noon);
+    STD_Morn_TgtHold_cursor_p(1, jj) = std(per_trial_avg_z_cursor_p_morn);
+    STD_Noon_TgtHold_cursor_p(1, jj) = std(per_trial_avg_z_cursor_p_noon);
     % Standard error
-    Err_Morn_Ramp_Force(1, jj) = STD_Morn_TgtHold_Force(1, jj) / sqrt(length(per_trial_avg_end_Force_morn));
-    Err_Noon_Ramp_Force(1, jj) = STD_Noon_TgtHold_Force(1, jj) / sqrt(length(per_trial_avg_end_Force_noon));
+    Err_Morn_Ramp_CursorPos(1, jj) = STD_Morn_TgtHold_cursor_p(1, jj) / sqrt(length(per_trial_avg_z_cursor_p_morn));
+    Err_Noon_Ramp_CursorPos(1, jj) = STD_Noon_TgtHold_cursor_p(1, jj) / sqrt(length(per_trial_avg_z_cursor_p_noon));
     % Percent change
-    Ramp_Force_perc_changes(1, jj) = (Noon_Ramp_Force - Morn_Ramp_Force) / abs(Morn_Ramp_Force);
+    Ramp_CursorPos_perc_changes(1, jj) = (Noon_Ramp_CursorPos - Morn_Ramp_CursorPos) / abs(Morn_Ramp_CursorPos);
 
-    %% Plot the ramp phase Force
-
+    %% Plot the cursor position box & whisker plot
     if isequal(Plot_Figs, 1)
 
-        %% Plot the Force box and whisker plot
-
-        % Combining the morning and afternoon into one matrix
-        avg_ramp_Force = cat(1, per_trial_avg_end_Force_morn, per_trial_avg_end_Force_noon);
-        ramp_force_labels = zeros(length(avg_ramp_Force),1);
-        ramp_force_labels(length(per_trial_avg_end_Force_morn) + 1:end) = 1;
+        % Top Plot
+        % Combining the morning & afternoon into one matrix
+        avg_cursor_p = [per_trial_avg_z_cursor_p_morn; per_trial_avg_z_cursor_p_noon];
+        ramp_cursor_p_labels = zeros(length(avg_cursor_p),1);
+        ramp_cursor_p_labels(length(per_trial_avg_z_cursor_p_morn) + 1:end) = 1;
         
-        End_Force_mean(1,1) = Morn_Ramp_Force(1, jj);
-        End_Force_mean(1,2) = Noon_Ramp_Force(1, jj);
-        End_Force_STD(1,1) = STD_Morn_TgtHold_Force(1, jj);
-        End_Force_STD(1,2) = STD_Noon_TgtHold_Force(1, jj);
+        End_cursor_p_mean(1,1) = Morn_Ramp_CursorPos(1, jj);
+        End_cursor_p_mean(1,2) = Noon_Ramp_CursorPos(1, jj);
+        End_cursor_p_STD(1,1) = STD_Morn_TgtHold_cursor_p(1, jj);
+        End_cursor_p_STD(1,2) = STD_Noon_TgtHold_cursor_p(1, jj);
 
         figure
         subplot(211) % Top Plot
         hold on
-        boxplot(avg_ramp_Force, ramp_force_labels)
+        boxplot(avg_cursor_p, ramp_cursor_p_labels)
 
         % Setting the x-axis limits
         xlim([0.5, 2.5]);
 
         % Titling the plot
-        title(sprintf('Ramp Phase Force, %i°, TgtCenter at %0.1f', ... 
+        title(sprintf('Ramp Wrist Position, %i°, TgtCenter at %0.1f', ... 
             target_dirs_noon(jj), target_centers_noon(jj)), 'FontSize', title_font_size)
 
         % Get the top subplot title for saving
@@ -197,9 +199,9 @@ for jj = 1:num_dirs
         end
 
         % Annotation of the p_value
-        if round(Ramp_Force_p_values(1, jj), 3) > 0
+        if round(Ramp_CursorPos_p_values(1, jj), 3) > 0
             legend_dims = [0 0.45 0.44 0.44];
-            p_value_string = strcat('p =', {' '}, mat2str(round(Ramp_Force_p_values(1, jj), 3)));
+            p_value_string = strcat('p =', {' '}, mat2str(round(Ramp_CursorPos_p_values(1, jj), 3)));
             legend_string = {char(p_value_string)};
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
@@ -207,7 +209,7 @@ for jj = 1:num_dirs
             ann_legend.FontSize = legend_font_size;
             ann_legend.FontName = font_name;
         end
-        if isequal(round(Ramp_Force_p_values(1, jj), 3), 0)
+        if isequal(round(Ramp_CursorPos_p_values(1, jj), 3), 0)
             legend_dims = [0 0.45 0.44 0.44];
             p_value_string = strcat('p <', {' '}, '0.001');
             legend_string = {char(p_value_string)};
@@ -219,9 +221,9 @@ for jj = 1:num_dirs
         end
 
         % Annotation of the percent change
-        if ~isequal(round(Ramp_Force_perc_changes(1, jj), 3), 0)
+        if ~isequal(round(Ramp_CursorPos_perc_changes(1, jj), 3), 0)
             legend_dims = [0.55 0.45 0.44 0.44];
-            perc_change_string = strcat('Δ% =', {' '}, mat2str(round(Ramp_Force_perc_changes(1, jj), 3)));
+            perc_change_string = strcat('Δ% =', {' '}, mat2str(round(Ramp_CursorPos_perc_changes(1, jj), 3)));
             legend_string = {char(perc_change_string)};
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
@@ -229,7 +231,7 @@ for jj = 1:num_dirs
             ann_legend.FontSize = legend_font_size;
             ann_legend.FontName = font_name;
         end
-        if isequal(round(Ramp_Force_perc_changes(1, jj), 3), 0)
+        if isequal(round(Ramp_CursorPos_perc_changes(1, jj), 3), 0)
             legend_dims = [0.55 0.45 0.44 0.44];
             perc_change_string = strcat('Δ% ≈', {' '}, '0');
             legend_string = {char(perc_change_string)};
@@ -253,13 +255,13 @@ for jj = 1:num_dirs
         hold on
         % Set the title
         title('Morning', 'FontSize', title_font_size);
-        for pp = 1:length(Sigma_Force_morn)
-            plot(Sigma_Force_morn{pp,1})
+        for pp = 1:length(z_cursor_p_morn)
+            plot(z_cursor_p_morn{pp,1})
         end
 
         % Annotation of number of trials
         legend_dims = [0.175 0.02 0.44 0.44];
-        trial_num_string = strcat('n =', {' '}, mat2str(length(Sigma_Force_morn)));
+        trial_num_string = strcat('n =', {' '}, mat2str(length(z_cursor_p_morn)));
         legend_string = {char(trial_num_string)};
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
@@ -279,13 +281,13 @@ for jj = 1:num_dirs
         hold on
         % Set the title
         title('Afternoon', 'FontSize', title_font_size);
-        for pp = 1:length(Sigma_Force_noon)
-            plot(Sigma_Force_noon{pp,1})
+        for pp = 1:length(z_cursor_p_noon)
+            plot(z_cursor_p_noon{pp,1})
         end
 
         % Annotation of number of trials
         legend_dims = [0.625 0.02 0.44 0.44];
-        trial_num_string = strcat('n =', {' '}, mat2str(length(Sigma_Force_noon)));
+        trial_num_string = strcat('n =', {' '}, mat2str(length(z_cursor_p_noon)));
         legend_string = {char(trial_num_string)};
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 

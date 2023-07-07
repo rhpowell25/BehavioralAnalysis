@@ -1,35 +1,32 @@
-function Cursor_Norm_Factor = Multi_Session_NormalizeCursor(xds_morn, xds_noon, signal_choice, norm_cursor)
+
+function cursor_YLims = CursorYLimit(xds_morn, xds_noon, signal_choice)
 
 %% File Description:
 
 % This function finds the nth percentile of cursor position, velocity, or 
-% acceleration between two XDS files for the purpose of normalization.
+% acceleration between two XDS files to set the Y-axis limits for plotting.
 % Depending on the method, the nth percentile will be calculated using
 % the entirety of both files or using only the succesful trials.
-% If you set norm_cursor to 0, the Cursor_Norm_Factor will be 1
 %
 % -- Inputs --
 % xds_morn: the first xds file
 % xds_noon: the second xds file
 % signal_choice: 'Pos', 'Vel', or 'Acc'
-% norm_cursor: 1 or 0
 
-%% End the function if you are not zeroing the cursor signal
-if ~isequal(norm_cursor, 1)
-    disp('Cursor Signal Will Not Be Normalized')
-    Cursor_Norm_Factor = 1;
-    return
-else
-    norm_prctile = 95;
-    fprintf('Cursor Signal Will Be Normalized to the %ith percentile \n', norm_prctile);
-end
+%% Display the functions being used
+disp('Cursor Y-Limit Function:');
 
 %% What part of the cursor signal do you want to take the percentile of
 % All the cursor data ('All_Cursor')
 % The cursor data in each succesful trial ('Trial_Cursor')
-norm_method = 'Trial_Cursor';
+YLimit_method = 'Trial_Cursor';
 
 %% Basic Settings, some variable extractions, & definitions
+% Percentiles for maximums & minimums
+max_perc = 99;
+min_perc = 1;
+
+axis_expansion = 0;
 
 % Extract the cursor signal of chhoice
 if strcmp(signal_choice, 'Pos')
@@ -43,6 +40,9 @@ elseif strcmp(signal_choice, 'Acc')
     curs_noon = xds_noon.curs_a;
 end
 
+% Initialize the output variable
+cursor_YLims = zeros(1,2);
+    
 %% Concatenate the cursor signal
 
 cat_curs = cat(1, curs_morn, curs_noon);
@@ -50,17 +50,19 @@ cat_curs = cat(1, curs_morn, curs_noon);
 %% Find the vector sum of the cursor signal
 z_cat_curs = sqrt(cat_curs(:, 2).^2 + cat_curs(:, 1).^2);
 
-%% Finding the max cursor signal throughout both files
+%% Finding the min & max cursor signal throughout both files
 
-if stcmp(norm_method, 'All_Cursor')
+if strcmp(YLimit_method, 'All_Cursor')
 
-    % Find the nth percentile of the cursor position
-    Cursor_Norm_Factor = prctile(z_cat_curs, norm_prctile);
+    % Maximum
+    cursor_YLims(1) = prctile(z_cat_curs, max_perc) + axis_expansion;
+    % Minimum
+    cursor_YLims(2) = prctile(z_cat_curs, min_perc) - axis_expansion;
 
 end
 
 %% Concatenate the morning & afternoon information
-if strcmp(norm_method, 'Trial_Cursor')
+if strcmp(YLimit_method, 'Trial_Cursor')
 
     % Time frame
     noon_time_frame = xds_noon.time_frame + xds_morn.time_frame(end);
@@ -137,19 +139,23 @@ if strcmp(norm_method, 'Trial_Cursor')
             rewarded_end_idx(ii)+(2/bin_width));
     end
     
-    %% Finding the max cursor signal per trial
+    %% Finding the min & max cursor signal per trial
     
     max_curs_pertrial = zeros(height(rewarded_curs_sig),1);
+    min_curs_pertrial = zeros(height(rewarded_curs_sig),1);
     for ii = 1:height(rewarded_curs_sig)
+        min_curs_pertrial(ii,1) = min(rewarded_curs_sig{ii,1}(:,1));
         max_curs_pertrial(ii,1) = max(rewarded_curs_sig{ii,1}(:,1));
     end
     
-    %% Find the 95th percentile of the max's
-    Cursor_Norm_Factor = prctile(max_curs_pertrial, norm_prctile);
+    %% Finding the min & max cursor signal throughout both files
+
+    % Maximum
+    cursor_YLims(1) = prctile(max_curs_pertrial, max_perc) + axis_expansion;
+    % Minimum
+    cursor_YLims(2) = prctile(min_curs_pertrial, min_perc) - axis_expansion;
+
 end
-
-
-
 
 
 

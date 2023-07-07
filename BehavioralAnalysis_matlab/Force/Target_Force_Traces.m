@@ -6,6 +6,8 @@ disp('Target Force Traces:');
 
 %% Basic Settings, some variable extractions, & definitions
 
+gain_factor = 3; % 3; % 
+
 % Find the force y-limits
 force_YLims = ForceYLimit(xds_morn, xds_noon, norm_force);
 
@@ -193,17 +195,17 @@ for jj = 1:num_dirs
         all_trials_Second_Force_noon{jj,1} = all_trials_Second_Force_noon{jj,1} / Force_Norm_Factor*100;
     elseif strcmp(norm_force, 'Convert')
         for pp = 1:length(First_Trial_Force_morn{jj,1})
-            First_Trial_Force_morn{jj,1}{pp,1} = First_Trial_Force_morn{jj,1}{pp,1} / 1000*5; % Millivolt conversion * gain
-            Second_Trial_Force_morn{jj,1}{pp,1} = Second_Trial_Force_morn{jj,1}{pp,1} / 1000*5; % Millivolt conversion * gain
+            First_Trial_Force_morn{jj,1}{pp,1} = First_Trial_Force_morn{jj,1}{pp,1} / 1000*gain_factor; % Millivolt conversion * gain
+            Second_Trial_Force_morn{jj,1}{pp,1} = Second_Trial_Force_morn{jj,1}{pp,1} / 1000*gain_factor; % Millivolt conversion * gain
         end
         for pp = 1:length(First_Trial_Force_noon{jj,1})
-            First_Trial_Force_noon{jj,1}{pp,1} = First_Trial_Force_noon{jj,1}{pp,1} / 1000*5; % Millivolt conversion * gain
-            Second_Trial_Force_noon{jj,1}{pp,1} = Second_Trial_Force_noon{jj,1}{pp,1} / 1000*5; % Millivolt conversion * gain
+            First_Trial_Force_noon{jj,1}{pp,1} = First_Trial_Force_noon{jj,1}{pp,1} / 1000*gain_factor; % Millivolt conversion * gain
+            Second_Trial_Force_noon{jj,1}{pp,1} = Second_Trial_Force_noon{jj,1}{pp,1} / 1000*gain_factor; % Millivolt conversion * gain
         end
-        all_trials_First_Force_morn{jj,1} = all_trials_First_Force_morn{jj,1} / 1000*5; % Millivolt conversion * gain
-        all_trials_Second_Force_morn{jj,1} = all_trials_Second_Force_morn{jj,1} / 1000*5; % Millivolt conversion * gain
-        all_trials_First_Force_noon{jj,1} = all_trials_First_Force_noon{jj,1} / 1000*5; % Millivolt conversion * gain
-        all_trials_Second_Force_noon{jj,1} = all_trials_Second_Force_noon{jj,1} / 1000*5; % Millivolt conversion * gain
+        all_trials_First_Force_morn{jj,1} = all_trials_First_Force_morn{jj,1} / 1000*gain_factor; % Millivolt conversion * gain
+        all_trials_Second_Force_morn{jj,1} = all_trials_Second_Force_morn{jj,1} / 1000*gain_factor; % Millivolt conversion * gain
+        all_trials_First_Force_noon{jj,1} = all_trials_First_Force_noon{jj,1} / 1000*gain_factor; % Millivolt conversion * gain
+        all_trials_Second_Force_noon{jj,1} = all_trials_Second_Force_noon{jj,1} / 1000*gain_factor; % Millivolt conversion * gain
     end
 
     %% Calculating average Force (Average per trial)

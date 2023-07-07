@@ -12,12 +12,15 @@ end
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Event lengths
-before_event = 3;
-after_event = 3;
+% Pull the binning paramaters
+[Bin_Params] = Binning_Parameters;
+
+% Time before & after the event
+before_event = Bin_Params.before_event;
+after_event = Bin_Params.after_event;
 
 % Window to calculate max firing rate
-window_size = 0.1;
+half_window_length = Bin_Params.half_window_length; % Time (sec.)
 
 if ~contains(event, 'window')
     max_fr_time = 0;
@@ -28,7 +31,11 @@ if contains(event, 'gocue') || contains(event, 'force_onset')
     time_before_gocue = 0.4;
 elseif contains(event, 'end')
     % Define the window for the movement phase
-    time_before_end = xds.meta.TgtHold;
+    try
+        time_before_end = xds.meta.TgtHold;
+    catch
+        time_before_end = NaN;
+    end
 end
 
 % Font specifications
@@ -56,7 +63,7 @@ for jj = 1:num_dirs
     
     if contains(event, 'window')
         % Run the preferred direction window function
-        [~, max_fr_time, ~] = ...
+        [~, max_fr_time] = ...
         EventWindow(xds, unit_name, target_dirs(jj), target_centers(jj), event);
     end
     
@@ -95,14 +102,10 @@ for jj = 1:num_dirs
     end
 
     %% Sum the two force transducers
-    z_Force = struct([]);
-    % Loops through force
-    for ii = 1:length(Alignment_Times)
-        z_Force{ii,1} = Force{ii,1}(:, 2) + Force{ii, 1}(:, 1);
-    end
+    [Sigma_Force] = Sum_Force(xds.meta.task, Force);
 
     %% Define the absolute timing
-    absolute_timing = linspace(-before_event, after_event, length(z_Force{1,1}));
+    absolute_timing = linspace(-before_event, after_event, length(Sigma_Force{1,1}));
 
     %% Plot the decomposed individual force positions on the top
 
@@ -110,7 +113,6 @@ for jj = 1:num_dirs
     subplot(211);
     hold on
     for ii = 1:length(rewarded_gocue_time)
-
         plot(absolute_timing, Force{ii,1}(:,1), 'b', 'LineWidth',.2, 'LineStyle','--')
         plot(absolute_timing, Force{ii,1}(:,2), 'g', 'LineWidth',.2, 'LineStyle','--')
     end
@@ -144,10 +146,10 @@ for jj = 1:num_dirs
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
-        line([max_fr_time - window_size, max_fr_time - window_size], ... 
+        line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
-        line([max_fr_time + window_size, max_fr_time + window_size], ... 
+        line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window
@@ -171,20 +173,20 @@ for jj = 1:num_dirs
     subplot(212);
     hold on
     for ii = 1:length(rewarded_gocue_time)
-        plot(absolute_timing, z_Force{ii,1}, 'LineWidth',.2)
+        plot(absolute_timing, Sigma_Force{ii,1}, 'LineWidth',.2)
     end
     
     for ii = 1:length(rewarded_gocue_time)
         force_gocue_idx = timings{ii,1} == rewarded_gocue_time(ii);
         force_end_idx = timings{ii,1} == rewarded_end_time(ii);
         % Plot the go-cues as dark green dots
-        if ~isempty(z_Force{ii,1}(force_gocue_idx))
-            plot(-gocue_to_event(ii), z_Force{ii,1}(force_gocue_idx), ...
+        if ~isempty(Sigma_Force{ii,1}(force_gocue_idx))
+            plot(-gocue_to_event(ii), Sigma_Force{ii,1}(force_gocue_idx), ...
                 'Marker', '.', 'Color', [0 0.5 0], 'Markersize', 15);
         end
         % Plot the trial ends as red dots
-        if ~isempty(z_Force{ii,1}(force_end_idx))
-            plot(event_to_end(ii), z_Force{ii,1}(force_end_idx), ...
+        if ~isempty(Sigma_Force{ii,1}(force_end_idx))
+            plot(event_to_end(ii), Sigma_Force{ii,1}(force_end_idx), ...
                 'Marker', '.', 'Color', 'r', 'Markersize', 15);
         end
     end
@@ -218,10 +220,10 @@ for jj = 1:num_dirs
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
-        line([max_fr_time - window_size, max_fr_time - window_size], ... 
+        line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
-        line([max_fr_time + window_size, max_fr_time + window_size], ... 
+        line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
             [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window

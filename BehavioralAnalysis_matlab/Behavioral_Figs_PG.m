@@ -11,10 +11,10 @@ close all
 clc
 
 % Monkey Name
-Monkey = 'Pop';
+Monkey = 'Tot';
 
 % Drug
-Drug_Choice = 'Lex';
+Drug_Choice = 'Caff';
 
 % Load the file information
 [Dates, Tasks, ~] = File_Details(Monkey, Drug_Choice);
@@ -25,14 +25,18 @@ powergrasp_idx = find(contains(Tasks, 'PG'));
 Dates = Dates(powergrasp_idx);
 Tasks = Tasks(powergrasp_idx);
 
+% Sorted or unsorted (1 vs 0)
+Sorted = 1;
+
 %% Loop through each xds file
 for xx = 1:length(Dates)
 
-    xds_morn = Load_XDS(Monkey, Dates{xx}, Tasks{xx}, 'Morn');
-    xds_noon = Load_XDS(Monkey, Dates{xx}, Tasks{xx}, 'Noon');
+    % Load the xds files
+    xds_morn = Load_XDS(Monkey, Dates{xx}, Tasks{xx}, Sorted, 'Morn');
+    xds_noon = Load_XDS(Monkey, Dates{xx}, Tasks{xx}, Sorted, 'Noon');
     
     % Process the xds files
-    Match_The_Targets = 1;
+    Match_The_Targets = 0;
     [xds_morn, xds_noon] = Process_XDS(xds_morn, xds_noon, Match_The_Targets);
     
     %% Save directory
@@ -74,15 +78,12 @@ for xx = 1:length(Dates)
     if ~exist(save_dir, 'dir')
         mkdir(save_dir);
     end
-    
-    Rxn_Time_BoxPlot(xds_morn, xds_noon, 0)
+
+    Task_Metric_ViolinPlot(xds_morn, xds_noon, 'Rxn_Time', 0)
     
     % Save Figures
     for ii = 1:length(findobj('type','figure'))
-        fig_info = get(gca,'title');
-        save_title = get(fig_info, 'string');
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, '.', '_');
+        save_title = strcat('Reaction Time', Dates{xx}, '_', Monkey, '_', Tasks{xx});
         if ~strcmp(Save_Figs, 'All')
             saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
         end

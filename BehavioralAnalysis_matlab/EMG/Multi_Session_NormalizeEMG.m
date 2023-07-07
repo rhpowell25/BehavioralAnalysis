@@ -5,7 +5,7 @@ function EMG_Norm_Factor = Multi_Session_NormalizeEMG(xds_morn, xds_noon, muscle
 % This function finds the nth percentile EMG between two concatenated XDS 
 % files for the purpose of normalization.
 % Depending on norm_method, the nth percentile will be calculated using the
-% entirety of both files or using only the succesful trials
+% entirety of both files or using only the succesful trials.
 % If you set norm_EMG to 0, the EMG_Norm_Factor will be 1
 %
 % -- Inputs --
@@ -31,7 +31,7 @@ end
 %% What part of the EMG do you want to take the percentile of
 % All the EMG data ('All_EMG')
 % The EMG in each succesful trial ('Trial_EMG')
-norm_method = 'All_EMG';
+norm_method = 'Trial_EMG';
 
 %% Concatenate the EMG
 
@@ -118,8 +118,13 @@ if strcmp(norm_method, 'Trial_EMG')
                 EMG{ii} = cat_EMG(rewarded_start_idx(jj) : ... 
                     rewarded_end_idx(jj)+(2/bin_width),ii);
             else
-                EMG{ii} = cat(1, EMG{ii}(:,1), cat_EMG(rewarded_start_idx(jj) : ... 
-                    rewarded_end_idx(jj)+(2/bin_width),ii));
+                if rewarded_end_idx(jj)+(2/bin_width) < length(cat_EMG)
+                    EMG{ii} = cat(1, EMG{ii}(:,1), cat_EMG(rewarded_start_idx(jj) : ... 
+                        rewarded_end_idx(jj)+(2/bin_width),ii));
+                else
+                    EMG{ii} = cat(1, EMG{ii}(:,1), cat_EMG(rewarded_start_idx(jj) : ... 
+                        end,ii));
+                end
             end  
         end
     end

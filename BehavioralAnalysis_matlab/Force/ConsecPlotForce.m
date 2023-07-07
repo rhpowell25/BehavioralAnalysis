@@ -109,11 +109,7 @@ else
 end
 
 %% Sum the two force transducers
-z_Force = struct([]);
-% Loops through force
-for ii = 1:length(rewarded_gocue_time)
-    z_Force{ii,1} = Force{ii,1}(:, 2) + Force{ii, 1}(:, 1);
-end   
+[Sigma_Force] = Sum_Force(xds.meta.task, Force);
 
 %% Concatenating the force & relative timing
 
@@ -123,8 +119,8 @@ for ii = 1:height(relative_timing)
 end
 
 cat_force = [];
-for ii = 1:height(z_Force)
-    cat_force = cat(1,cat_force, z_Force{ii,:});
+for ii = 1:height(Sigma_Force)
+    cat_force = cat(1,cat_force, Sigma_Force{ii,:});
 end
 
 %% Define the number of trials that will be plotted

@@ -52,14 +52,14 @@ end
 if strcmp(zero_method, 'Window')
 
     % Moving average window size (200 ms)
-    window_size = 200;
+    half_window_size = 100;
 
     % Window step size (in indices)
     step_size = 1;
 
     EMG_Zero_Factor = zeros(1,length(M));
     for ii = 1:length(M)
-        [sliding_avg, ~, ~] = Sliding_Window(EMG(:, ii), window_size, step_size);
+        [sliding_avg, ~, ~] = Sliding_Window(EMG(:, ii), half_window_size, step_size);
         EMG_Zero_Factor(1,ii) = min(sliding_avg);
     end
 

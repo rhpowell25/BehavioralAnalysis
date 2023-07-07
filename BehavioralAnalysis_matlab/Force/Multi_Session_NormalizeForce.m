@@ -93,17 +93,13 @@ for ii = 1:height(total_rewarded_idx)
 end
 
 %% Recompose the force
-z_Force = struct([]);
-% Loops through force
-for ii = 1:height(total_rewarded_idx)
-    z_Force{ii,1} = Force{ii,1}(:, 2) + Force{ii, 1}(:, 1);
-end
+[Sigma_Force] = Sum_Force(xds_morn.meta.task, Force);
 
 %% Finding the max force per trial
 
-max_Force_pertrial = zeros(height(z_Force),1);
-for ii = 1:height(z_Force)
-    max_Force_pertrial(ii,1) = max(z_Force{ii,1}(:,1));
+max_Force_pertrial = zeros(height(Sigma_Force),1);
+for ii = 1:height(Sigma_Force)
+    max_Force_pertrial(ii,1) = max(Sigma_Force{ii,1}(:,1));
 end
 
 %% Find the 95th percentile of the max's

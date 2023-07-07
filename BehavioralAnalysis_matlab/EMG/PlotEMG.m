@@ -3,30 +3,6 @@ function [avg_EMG] = PlotEMG(xds, event, unit_name, EMG_Zero_Factor, EMG_Norm_Fa
 %% Display the function being used
 disp('Plot EMG Function:');
 
-%% Load the excel file
-if ~isnan(unit_name)
-    if ~ischar(unit_name)
-    
-        [xds_output] = Find_Excel(xds);
-    
-        %% Find the unit of interest
-    
-        unit = xds_output.unit_names(unit_name);
-    
-        %% Identify the index of the unit
-        N = find(strcmp(xds.unit_names, unit));
-    
-    else
-        N = find(strcmp(xds.unit_names, unit_name));
-    end
-
-    %% End the function with NaN output variables if the unit doesnt exist
-    if isempty(N)
-        fprintf('%s does not exist \n', unit_name);
-        return
-    end
-end
-
 %% Find the EMG index
 [M] = EMG_Index(xds, muscle_groups);
 
@@ -35,12 +11,15 @@ end
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Event lengths
-before_event = 3;
-after_event = 3;
+% Pull the binning paramaters
+[Bin_Params] = Binning_Parameters;
+
+% Time before & after the event
+before_event = Bin_Params.before_event;
+after_event = Bin_Params.after_event;
 
 % Window to calculate max firing rate
-window_size = 0.1;
+half_window_length = Bin_Params.half_window_length; % Time (sec.)
 
 if ~contains(event, 'window')
     max_fr_time = 0;
@@ -82,7 +61,7 @@ for jj = 1:num_dirs
 
     if contains(event, 'window')
         % Run the preferred direction window function
-        [~, max_fr_time, ~] = ...
+        [~, max_fr_time] = ...
         EventWindow(xds, unit_name, target_dirs(jj), target_centers(jj), event);
     end
 
@@ -193,10 +172,10 @@ for jj = 1:num_dirs
         
             if contains(event, 'window')
                 % Dotted purple line indicating beginning of measured window
-                line([max_fr_time - window_size, max_fr_time - window_size], ... 
+                line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
                     [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
                 % Dotted purple line indicating end of measured window
-                line([max_fr_time + window_size, max_fr_time + window_size], ... 
+                line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
                     [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
             elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
                 % Dotted red line indicating beginning of measured window

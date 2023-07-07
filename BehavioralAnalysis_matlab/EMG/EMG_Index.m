@@ -9,6 +9,14 @@ function [M] = EMG_Index(xds, muscle_groups)
 % xds: the XDS file in question
 % muscle_groups: 'Flex', 'Ext', Uln_Dev', 'Rad_Dev', 'Both', 'Grasp', 'Custom', or 'All'
 
+%% If there is no EMG
+
+if ~xds.has_EMG
+    disp('No EMG in this file');
+    M = [];
+    return
+end
+
 %% Define the muscles 
 
 muscle_names = strings;
@@ -43,6 +51,12 @@ end
 if strcmp(muscle_groups, 'Grasp')
     muscle_names(1) = 'FDP';
     muscle_names(2) = 'FDS';
+end
+
+if strcmp(muscle_groups, 'Pinch')
+    muscle_names(1) = '1DI';
+    muscle_names(2) = 'APB';
+    muscle_names(3) = 'FPB';
 end
 
 if strcmp(muscle_groups, 'Custom')
