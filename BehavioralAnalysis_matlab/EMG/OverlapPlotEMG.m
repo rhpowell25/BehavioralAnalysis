@@ -1,26 +1,21 @@
-function OverlapPlotEMG(xds_morn, xds_noon, event, zero_EMG, norm_EMG, muscle_groups, Save_Figs)
+function OverlapPlotEMG(xds_morn, xds_noon, event, zero_EMG, norm_EMG, muscle_group, Save_Figs)
 
 %% Display the function being used
 disp('Overlap EMG Function:');
 
+%% Find the EMG index
+[M] = EMG_Index(xds_morn, muscle_group);
+
 %% Zero & normalize the EMG
 % Zero? (1 = Yes, 0 = No)
 zero_method = 'Prctile';
-EMG_Zero_Factor = Multi_Session_EMG_Zero(xds_morn, xds_noon, muscle_groups, zero_method, zero_EMG);
+EMG_Zero_Factor = Multi_Session_EMG_Zero(xds_morn, xds_noon, muscle_group, zero_method, zero_EMG);
 
 % Normalize EMG? (1 = Yes, 0 = No)
 norm_prctile = 99;
-EMG_Norm_Factor = Multi_Session_NormalizeEMG(xds_morn, xds_noon, muscle_groups, norm_prctile, norm_EMG);
-
-%% Find the EMG index
-[M] = EMG_Index(xds_morn, muscle_groups);
+EMG_Norm_Factor = Multi_Session_NormalizeEMG(xds_morn, xds_noon, muscle_group, norm_prctile, norm_EMG);
 
 %% Basic Settings, some variable extractions, & definitions
-
-% Define the window for the baseline phase
-time_before_gocue = 0.4;
-% Define the window for the movement phase
-time_before_end = xds_morn.meta.TgtHold;
 
 % Pull the binning paramaters
 [Bin_Params] = Binning_Parameters;
@@ -29,6 +24,17 @@ time_before_end = xds_morn.meta.TgtHold;
 before_event = Bin_Params.before_event;
 after_event = Bin_Params.after_event;
 
+% Binning information
+bin_size = xds_morn.bin_width; % Time (sec.)
+
+if contains(event, 'gocue') || contains(event, 'force_onset')
+    % Define the window for the baseline phase
+    time_before_gocue = 0.4;
+elseif contains(event, 'end')
+    % Define the window for the movement phase
+    time_before_end = xds.meta.TgtHold;
+end
+
 % Font & figure specifications
 label_font_size = 15;
 title_font_size = 15;
@@ -36,15 +42,24 @@ legend_font_size = 12;
 figure_width = 750;
 figure_height = 250;
 
-%% Load the average force
-
-% Average EMG
-[average_EMG_morn] = PlotEMG(xds_morn, event, NaN, EMG_Zero_Factor, EMG_Norm_Factor, muscle_groups, 0, 0);
-[average_EMG_noon] = PlotEMG(xds_noon, event, NaN, EMG_Zero_Factor, EMG_Norm_Factor, muscle_groups, 0, 0);
-
 %% Extract the target directions & centers
 [target_dirs_morn, target_centers_morn] = Identify_Targets(xds_morn);
 [target_dirs_noon, target_centers_noon] = Identify_Targets(xds_noon);
+
+%% Load the average force
+
+avg_EMG_morn = struct([]);
+for jj = 1:length(target_dirs_morn)
+    % Get the average EMG & peak amplitude time
+    [avg_EMG_morn{jj,1}, ~] = ...
+        EventWindowEMG(xds_morn, muscle_group, target_dirs_morn(jj), target_centers_morn(jj), event);
+end
+avg_EMG_noon = struct([]);
+for jj = 1:length(target_dirs_noon)
+    % Get the average EMG & peak amplitude time
+    [avg_EMG_noon{jj,1}, ~] = ...
+        EventWindowEMG(xds_noon, muscle_group, target_dirs_noon(jj), target_centers_noon(jj), event);
+end
 
 %% Check to see if both sessions use a consistent number of targets
 
@@ -57,43 +72,34 @@ if ~all(Matching_Idxs_Morn) || ~all(Matching_Idxs_Noon)
     disp('Uneven Targets Between Morning & Afternoon');
     target_centers_morn = target_centers_morn(Matching_Idxs_Morn);
     target_dirs_morn = target_dirs_morn(Matching_Idxs_Morn);
-    average_EMG_morn = average_EMG_morn(Matching_Idxs_Noon);
-    average_EMG_noon = average_EMG_noon(Matching_Idxs_Noon);
+    avg_EMG_morn = avg_EMG_morn(Matching_Idxs_Noon);
+    avg_EMG_noon = avg_EMG_noon(Matching_Idxs_Noon);
 end
 
 %% X-axis
-EMG_time = linspace(-before_event, after_event, length(average_EMG_morn{1}{1}));
-
-%% Y-axis limits
-%y_limits = zeros(2,1);
-%y_max = zeros(length(average_EMG_morn)*length(M),2);
-%y_min = zeros(length(average_EMG_morn)*length(M),2);
-
-%cc = 1;
-%for jj = 1:length(average_EMG_morn)
-%    for pp = 1:length(M)
-%        y_max(cc,1) = max(average_EMG_morn{jj,1}{pp,1});
-%        y_max(cc,2) = max(average_EMG_noon{jj,1}{pp,1});
-%        y_min(cc,1) = min(average_EMG_morn{jj,1}{pp,1});
-%        y_min(cc,2) = min(average_EMG_noon{jj,1}{pp,1});
-%        cc = cc + 1;
-%    end
-%end
-
-%y_limits(1) = min(y_min, [],'all') - 0.5;
-%y_limits(2) = max(y_max, [],'all') + 0.5;
+EMG_time = (-before_event:bin_size:after_event);
+EMG_time = EMG_time(1:end-1) + bin_size/2;
 
 %% Plot the two overlapped
-for jj = 1:length(average_EMG_morn)
+for jj = 1:length(avg_EMG_morn)
 
-    for ii = 1:length(average_EMG_morn{jj,1})
+    for ii = 1:height(avg_EMG_morn{jj,1})
 
         Overlap_EMG_figure = figure;
         Overlap_EMG_figure.Position = [300 300 figure_width figure_height];
-    
         hold on
-        plot(EMG_time, average_EMG_morn{jj,1}{ii,1}, 'LineWidth', 2, 'Color', [0.9290, 0.6940, 0.1250])
-        plot(EMG_time, average_EMG_noon{jj,1}{ii,1}, 'LineWidth', 2, 'Color', [.5 0 .5])
+
+        %% Zero the average EMG
+        avg_EMG_morn{jj,1}(ii,:) = avg_EMG_morn{jj,1}(ii,:) - EMG_Zero_Factor(ii);
+        avg_EMG_noon{jj,1}(ii,:) = avg_EMG_noon{jj,1}(ii,:) - EMG_Zero_Factor(ii);
+        
+        %% Normalize the average EMG
+        avg_EMG_morn{jj,1}(ii,:) = (avg_EMG_morn{jj,1}(ii,:) / EMG_Norm_Factor(ii))*100;
+        avg_EMG_noon{jj,1}(ii,:) = (avg_EMG_noon{jj,1}(ii,:) / EMG_Norm_Factor(ii))*100;
+
+        %% Plot the average EMG
+        plot(EMG_time, avg_EMG_morn{jj,1}(ii,:), 'LineWidth', 2, 'Color', [0.9290, 0.6940, 0.1250])
+        plot(EMG_time, avg_EMG_noon{jj,1}(ii,:), 'LineWidth', 2, 'Color', [.5 0 .5])
         
         y_limits = ylim;
         % Titling the plot
