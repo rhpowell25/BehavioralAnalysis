@@ -1,4 +1,4 @@
-function Target_Force_Traces(xds_morn, xds_noon, norm_force, Save_Figs)
+function Target_Force_Traces(xds_morn, xds_noon, norm_force, Save_File)
 
 %% Display the function being used
 
@@ -41,7 +41,7 @@ title_font_size = 14;
 font_name = 'Arial';
 
 % Save Counter
-if ~isequal(Save_Figs, 0)
+if ~isequal(Save_File, 0)
     close all
 end
 
@@ -275,8 +275,8 @@ for kk = 1:length(target_centers_morn)
     end
 
     % Set the title
-    title_string = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': TgtCenter at', {' '}, num2str(target_centers_morn(kk)));
-    title(title_string, 'FontSize', title_font_size)
+    Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': TgtCenter at', {' '}, num2str(target_centers_morn(kk)));
+    title(Fig_Title, 'FontSize', title_font_size)
 
     % Label the axis
     xlabel('FS1 - FS2', 'FontSize', label_font_size);
@@ -341,30 +341,11 @@ for kk = 1:length(target_centers_morn)
         ann_legend.FontName = font_name;
     end
 
-end
+    %% Save the file if selected
+    Save_Figs(Fig_Title, Save_File)
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = 1:numel(findobj('type','figure'))
-        fig_info = get(gca,'title');
-        save_title = get(fig_info, 'string');
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, 'vs.', 'vs');
-        save_title = strrep(save_title, 'mg.', 'mg');
-        save_title = strrep(save_title, 'kg.', 'kg');
-        save_title = strrep(save_title, '.', '_');
-        save_title = strrep(save_title, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
+end % End of the target loop
+
+
 
 

@@ -1,5 +1,5 @@
 
-function Decomposed_Force_Scatter(xds_morn, xds_noon, norm_force, Save_Figs)
+function Decomposed_Force_Scatter(xds_morn, xds_noon, norm_force, Save_File)
 
 %% Display the function being used
 
@@ -21,7 +21,7 @@ legend_font_size = 13;
 title_font_size = 14;
 
 % Save Counter
-if ~isequal(Save_Figs, 0)
+if ~isequal(Save_File, 0)
     close all
 end
 
@@ -262,8 +262,8 @@ if contains(nontask_info, 'Con')
 end
 
 % Set the title
-title_string = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': Decomposed Force');
-title(title_string, 'FontSize', title_font_size)
+Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': Decomposed Force');
+title(Fig_Title, 'FontSize', title_font_size)
 
 % Force marker shape & marker size
 decom_marker_metric ='.';
@@ -384,10 +384,6 @@ end
 xlim([axis_min, axis_max])
 ylim([axis_min, axis_max])
 
-% Record the title
-fig_info = get(gca,'title');
-save_title = get(fig_info, 'string');
-
 % Plot the bottom right legend
 if ~isequal(recom_Force, 0) || ~isequal(decom_Force, 0)
     right_legend = legend([dummy_yellow, dummy_purple, dummy_red, dummy_black], {'Morning', 'Afternoon', 'p <= 0.05', 'p > 0.05'}, ...
@@ -418,26 +414,7 @@ end
 left_legend.ItemTokenSize(1) = 15;
 legend boxoff
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = numel(findobj('type','figure')):-1:1
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, 'vs.', 'vs');
-        save_title = strrep(save_title, 'mg.', 'mg');
-        save_title = strrep(save_title, 'kg.', 'kg');
-        save_title = strrep(save_title, '.', '_');
-        save_title = strrep(save_title, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
+%% Save the file if selected
+Save_Figs(Fig_Title, Save_File)
 
 

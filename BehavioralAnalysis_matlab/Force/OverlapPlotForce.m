@@ -1,4 +1,4 @@
-function OverlapPlotForce(xds_morn, xds_noon, event, Save_Figs)
+function OverlapPlotForce(xds_morn, xds_noon, event, Save_File)
 
 %% Display the function being used
 disp('Overlap Force Function:');
@@ -93,8 +93,9 @@ for ii = 1:length(average_force_morn)
     plot(force_time, average_force_noon{ii,1}, 'LineWidth', 2, 'Color', [.5 0 .5])
     
     % Titling the top plot
-    title(sprintf('Mean force: %i°, TgtCenter at %0.1f', ... 
-        target_dirs_morn(ii), target_centers_morn(ii)), 'FontSize', title_font_size)
+    Fig_Title = sprintf('Mean force: %i°, TgtCenter at %0.1f', ... 
+        target_dirs_morn(ii), target_centers_morn(ii));
+    title(Fig_Title, 'FontSize', title_font_size)
 
     if contains(event, 'gocue')
         % Dotted green line indicating beginning of measured window
@@ -142,32 +143,12 @@ for ii = 1:length(average_force_morn)
     legend('Morning', 'Afternoon', 'Location', legend_location, 'FontSize', legend_font_size)
 
     % Remove the legend's outline
-    legend boxoff 
+    legend boxoff
+
+    %% Save the file if selected
+    Save_Figs(Fig_Title, Save_File)
  
 end
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = 1:numel(findobj('type','figure'))
-        fig_info = get(gca,'title');
-        save_title = get(fig_info, 'string');
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, 'vs.', 'vs');
-        save_title = strrep(save_title, 'mg.', 'mg');
-        save_title = strrep(save_title, 'kg.', 'kg');
-        save_title = strrep(save_title, '.', '_');
-        save_title = strrep(save_title, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
 
 

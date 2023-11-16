@@ -1,4 +1,4 @@
-function [rxn_time] = Task_Metric_ViolinPlot(xds_morn, xds_noon, Task_Metric, Plot_Figs, Save_Figs)
+function [rxn_time] = Task_Metric_ViolinPlot(xds_morn, xds_noon, Task_Metric, Plot_Figs, Save_File)
 
 %% File Description:
 
@@ -60,7 +60,7 @@ font_name = 'Arial';
 fig_size = 600;
 
 % Close all previously open figures if you're saving 
-if ~isequal(Save_Figs, 0)
+if ~isequal(Save_File, 0)
     close all
 end
 
@@ -124,13 +124,13 @@ for jj = 1:num_dir
         
         % Title
         if ~isequal(per_dir_plot, 0)
-            title_string = strcat(Date, {' '}, Task, ',', {' '}, Drug, ':', {' '}, ...
+            Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug, ':', {' '}, ...
                 num2str(target_dirs_noon(jj)), '°,', {' '}, 'TgtCenter at', {' '}, ...
                 num2str(target_centers_morn(jj)));
         else
-            title_string = strcat(Date, {' '}, Task, ',', {' '}, Drug);
+            Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug);
         end
-        sgt = sgtitle(title_string, 'FontSize', title_font_size);
+        sgtitle(Fig_Title, 'FontSize', title_font_size);
     
         % Morning violin plot
         subplot(1,2,1);
@@ -285,42 +285,15 @@ for jj = 1:num_dir
     % Mean reaction time
     rxn_time(jj,1) = (mean(time_length_morn) + mean(time_length_noon)) / 2;
 
+    %% Save the file if selected
+    Save_Figs(Fig_Title, Save_File)
+
     %% End the function after one loop if using all targets
     if isequal(per_dir_plot, 0)
         break
     end
 
 end
-
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = 1:length(findobj('type','figure'))
-        fig_info = sgt;
-        save_title = get(fig_info, 'string');
-        save_title = strcat(save_title, Task_Metric);
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, 'vs.', 'vs');
-        save_title = strrep(save_title, 'mg.', 'mg');
-        save_title = strrep(save_title, 'kg.', 'kg');
-        save_title = strrep(save_title, '.', '_');
-        save_title = strrep(save_title, '/', '_');
-        save_title = strrep(save_title, '{ }', ' ');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
-
-
-
-
 
 
 

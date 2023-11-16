@@ -1,4 +1,4 @@
-function OverlapPlotEMG(xds_morn, xds_noon, event, zero_EMG, norm_EMG, muscle_group, Save_Figs)
+function OverlapPlotEMG(xds_morn, xds_noon, event, zero_EMG, norm_EMG, muscle_group, Save_File)
 
 %% Display the function being used
 disp('Overlap EMG Function:');
@@ -103,9 +103,9 @@ for jj = 1:length(avg_EMG_morn)
         
         y_limits = ylim;
         % Titling the plot
-        EMG_title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
+        Fig_Title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
         title(sprintf('Mean EMG, %i°, TgtCenter at %0.1f: %s', ...
-            target_dirs_morn(jj), target_centers_morn(jj), EMG_title), 'FontSize', title_font_size)
+            target_dirs_morn(jj), target_centers_morn(jj), Fig_Title), 'FontSize', title_font_size)
     
         if contains(event, 'gocue')
             % Dotted green line indicating beginning of measured window
@@ -155,31 +155,11 @@ for jj = 1:length(avg_EMG_morn)
         % Remove the legend's outline
         legend boxoff
 
+        %% Save the file if selected
+        Save_Figs(Fig_Title, Save_File)
+
     end
 end
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for jj = 1:numel(findobj('type','figure'))
-        fig_info = get(gca,'title');
-        save_title = get(fig_info, 'string');
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, 'vs.', 'vs');
-        save_title = strrep(save_title, 'mg.', 'mg');
-        save_title = strrep(save_title, 'kg.', 'kg');
-        save_title = strrep(save_title, '.', '_');
-        save_title = strrep(save_title, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
 
 

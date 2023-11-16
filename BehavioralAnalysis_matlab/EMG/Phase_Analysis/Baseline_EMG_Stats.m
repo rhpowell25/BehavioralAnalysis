@@ -1,6 +1,6 @@
 function [EMG_Names, Baseline_EMG_p_values, Baseline_EMG_perc_changes, ...
     Morn_Baseline_EMG, Err_Morn_Baseline_EMG, Noon_Baseline_EMG, Err_Noon_Baseline_EMG] = ...
-    Baseline_EMG_Stats(xds_morn, xds_noon, muscle_groups, EMG_Zero_Factor, EMG_Norm_Factor, Plot_Figs, Save_Figs)
+    Baseline_EMG_Stats(xds_morn, xds_noon, muscle_groups, EMG_Zero_Factor, EMG_Norm_Factor, Plot_Figs, Save_File)
 
 %% Display the function being used
 disp('Baseline EMG Statistics:');
@@ -21,8 +21,8 @@ legend_font_size = 12;
 title_font_size = 15;
 font_name = 'Arial';
 
-if ~isequal(Save_Figs, 0)
-    save_title = strings;
+if ~isequal(Save_File, 0)
+    close all
 end
 
 % Define the window for the baseline phase
@@ -233,20 +233,14 @@ for jj = 1:num_dirs
             xlim([0.5, 2.5]);
 
             % Titling the plot
-            EMG_title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
+            Fig_Title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
             if ~isequal(per_dir_EMG, 0)
                 title(sprintf('Baseline EMG, %i°, TgtCenter at %0.1f: %s', ...
-                    target_dir_noon(jj), unique_targets_noon(kk), EMG_title), 'FontSize', title_font_size)
+                    target_dir_noon(jj), unique_targets_noon(kk), Fig_Title), 'FontSize', title_font_size)
             else
                 title(sprintf('Baseline EMG, All Trials: %s', ...
-                    EMG_title), 'FontSize', title_font_size)
+                    Fig_Title), 'FontSize', title_font_size)
             end      
-
-            % Get the top subplot title for saving
-            if ~isequal(Save_Figs, 0)
-                fig_info = get(gca,'title');
-                save_title{ii} = get(fig_info, 'string');
-            end
 
             % Annotation of the p_value
             if round(Baseline_EMG_p_values(ii, jj), 3) > 0
@@ -352,6 +346,9 @@ for jj = 1:num_dirs
 
         end % End of the EMG loop
 
+        %% Save the file if selected
+        Save_Figs(Fig_Title, Save_File)
+
     end % End of the Plot if-statement
 
     % End the function if you only want one baseline EMG
@@ -360,25 +357,3 @@ for jj = 1:num_dirs
     end
 
 end % End of target loop
-
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = numel(findobj('type','figure')):-1:1
-        save_title{ii} = strrep(save_title{ii}, ':', '');
-        save_title{ii} = strrep(save_title{ii}, 'vs.', 'vs');
-        save_title{ii} = strrep(save_title{ii}, 'mg.', 'mg');
-        save_title{ii} = strrep(save_title{ii}, 'kg.', 'kg');
-        save_title{ii} = strrep(save_title{ii}, '.', '_');
-        save_title{ii} = strrep(save_title{ii}, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'fig')
-        end
-        close gcf
-    end
-end

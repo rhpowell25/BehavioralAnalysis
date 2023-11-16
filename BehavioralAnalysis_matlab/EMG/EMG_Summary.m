@@ -1,4 +1,4 @@
-function EMG_Summary(xds, muscle_groups, time_length, Save_Figs)
+function EMG_Summary(xds, muscle_groups, time_length, Save_File)
 
 %% Basic Settings, some variable extractions, & definitions
 
@@ -92,8 +92,8 @@ for ii = 1:width(raw_EMG)
 
     EMG_sum_fig = figure;
     EMG_sum_fig.Position = [200 50 figure_width figure_height];
-    fig_title = strcat('EMG Summary:', strrep(string(EMG_names(ii)),'EMG_',' '));
-    sgtitle(fig_title, 'FontSize', (title_font_size + 5), 'Interpreter', 'None');
+    Fig_Title = strcat('EMG Summary:', strrep(string(EMG_names(ii)),'EMG_',' '));
+    sgtitle(Fig_Title, 'FontSize', (title_font_size + 5), 'Interpreter', 'None');
 
     % Raw EMG
     subplot(4,1,1)
@@ -141,19 +141,8 @@ for ii = 1:width(raw_EMG)
     x_min = min(raw_EMG_timeframe(1:raw_time_idx));
     xlim([x_min x_max]);
 
-    %% Define the save directory & save the figures
-    if ~isequal(Save_Figs, 0)
-        save_dir = 'C:\Users\rhpow\Desktop\';
-        fig_title = strrep(fig_title, ':', '');
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(fig_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(fig_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(fig_title)), 'fig')
-        else
-            saveas(gcf, fullfile(save_dir, char(fig_title)), Save_Figs)
-        end
-        close gcf
-    end
+    %% Save the file if selected
+    Save_Figs(Fig_Title, Save_File)
 
 end
 

@@ -1,4 +1,4 @@
-function Force_Sensor_Ratios(xds_morn, xds_noon, norm_force, Save_Figs)
+function Force_Sensor_Ratios(xds_morn, xds_noon, norm_force, Save_File)
 
 %% Display the function being used
 
@@ -15,7 +15,7 @@ legend_size = 15;
 font_name = 'Arial';
 
 % Save Counter
-if ~isequal(Save_Figs, 0)
+if ~isequal(Save_File, 0)
     close all
 end
 
@@ -176,8 +176,8 @@ for jj = 1:num_dirs
     end
     
     % Set the title
-    title_string = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': Force Sensor Ratios');
-    title(strcat(title_string, sprintf(': %i°, TgtCenter at %0.1f', ... 
+    Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': Force Sensor Ratios');
+    title(strcat(Fig_Title, sprintf(': %i°, TgtCenter at %0.1f', ... 
         target_dirs_morn(jj), target_centers_morn(jj))), 'FontSize', title_font_size)
     
     histogram(per_trial_Force_ratio_morn, 15, 'EdgeColor', 'k', 'FaceColor', [0.9290, 0.6940, 0.1250])
@@ -227,28 +227,11 @@ for jj = 1:num_dirs
         ann_p_value.FontName = font_name;
     end
 
+    %% Save the file if selected
+    Save_Figs(Fig_Title, Save_File)
+
 end % End of target loop
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = numel(findobj('type','figure')):-1:1
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, 'vs.', 'vs');
-        save_title = strrep(save_title, 'mg.', 'mg');
-        save_title = strrep(save_title, 'kg.', 'kg');
-        save_title = strrep(save_title, '.', '_');
-        save_title = strrep(save_title, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
+
 
 

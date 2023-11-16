@@ -1,4 +1,4 @@
-function Per_Trial_Force(xds, event, unit_name, Force_Norm_Factor, force_YLims, Save_Figs)
+function Per_Trial_Force(xds, event, unit_name, Force_Norm_Factor, force_YLims, Save_File)
 
 %% End the function if there is no Y-Limit
 
@@ -165,8 +165,9 @@ for jj = 1:num_dirs
     xlabel('Time (sec.)', 'FontSize', label_font_size);
     
     % Titling the top plot
-    title(sprintf('Decomposed Force: %i°, TgtCenter at %0.1f', ... 
-        target_dirs(jj), target_centers(jj)), 'FontSize', title_font_size)
+    Fig_Title = sprintf('Decomposed Force: %i°, TgtCenter at %0.1f', ... 
+        target_dirs(jj), target_centers(jj));
+    title(Fig_Title, 'FontSize', title_font_size)
 
     %% Plot the individual force positions on the bottom
 
@@ -238,39 +239,18 @@ for jj = 1:num_dirs
     ylabel('Force', 'FontSize', label_font_size);
     xlabel('Time (sec.)', 'FontSize', label_font_size);
     
-    % Titling the top plot
+    % Titling the bottom plot
     title(sprintf('Force: %i°, TgtCenter at %0.1f', ... 
         target_dirs(jj), target_centers(jj)), 'FontSize', title_font_size)
 
-    % End the event after one loop if showing baseline firing rate
+    %% Save the file if selected
+    Save_Figs(Fig_Title, Save_File)
+
+    %% End the event after one loop if showing baseline firing rate
     if strcmp(event, 'trial_gocue')
         return
     end
     
 end % End of target loop
-
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = 1:numel(findobj('type','figure'))
-        fig_info = get(gca,'title');
-        save_title = get(fig_info, 'string');
-        save_title = strrep(save_title, ':', '');
-        save_title = strrep(save_title, 'vs.', 'vs');
-        save_title = strrep(save_title, 'mg.', 'mg');
-        save_title = strrep(save_title, 'kg.', 'kg');
-        save_title = strrep(save_title, '.', '_');
-        save_title = strrep(save_title, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
 
 

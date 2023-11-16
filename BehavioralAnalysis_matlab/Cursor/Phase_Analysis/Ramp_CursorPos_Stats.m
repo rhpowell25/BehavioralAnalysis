@@ -1,6 +1,6 @@
 function [Ramp_CursorPos_p_values, Ramp_CursorPos_perc_changes, ...
     Morn_Ramp_CursorPos, Err_Morn_Ramp_CursorPos, Noon_Ramp_CursorPos, Err_Noon_Ramp_CursorPos] = ...
-    Ramp_CursorPos_Stats(xds_morn, xds_noon, norm_cursor, Plot_Figs, Save_Figs)
+    Ramp_CursorPos_Stats(xds_morn, xds_noon, norm_cursor, Plot_Figs, Save_File)
 
 %% File Description:
 
@@ -54,9 +54,8 @@ end
 num_dirs = length(target_dirs_morn);
 
 % Save Counter
-if ~isequal(Save_Figs, 0)
+if ~isequal(Save_File, 0)
     close all
-    save_title = strings;
 end
 
 %% Begin the loop through all directions
@@ -189,15 +188,10 @@ for jj = 1:num_dirs
         xlim([0.5, 2.5]);
 
         % Titling the plot
-        title(sprintf('Ramp Wrist Position, %i°, TgtCenter at %0.1f', ... 
-            target_dirs_noon(jj), target_centers_noon(jj)), 'FontSize', title_font_size)
-
-        % Get the top subplot title for saving
-        if ~isequal(Save_Figs, 0)
-            fig_info = get(gca,'title');
-            save_title(jj) = get(fig_info, 'string');
-        end
-
+        Fig_Title = sprintf('Ramp Wrist Position, %i°, TgtCenter at %0.1f', ... 
+            target_dirs_noon(jj), target_centers_noon(jj));
+        title(Fig_Title, 'FontSize', title_font_size)
+        
         % Annotation of the p_value
         if round(Ramp_CursorPos_p_values(1, jj), 3) > 0
             legend_dims = [0 0.45 0.44 0.44];
@@ -303,28 +297,9 @@ for jj = 1:num_dirs
         % Set The Font
         set(figure_axes,'FontName', font_name);
 
+        %% Save the file if selected
+        Save_Figs(Fig_Title, Save_File)
+
     end % End of the Plot if-statement
 
 end % End of target loop
-
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = numel(findobj('type','figure')):-1:1
-        save_title(ii) = strrep(save_title(ii), ':', '');
-        save_title(ii) = strrep(save_title(ii), 'vs.', 'vs');
-        save_title(ii) = strrep(save_title(ii), 'mg.', 'mg');
-        save_title(ii) = strrep(save_title(ii), 'kg.', 'kg');
-        save_title(ii) = strrep(save_title(ii), '.', '_');
-        save_title(ii) = strrep(save_title(ii), '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'fig')
-        end
-        close gcf
-    end
-end

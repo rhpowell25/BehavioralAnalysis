@@ -1,5 +1,5 @@
 function [EMG_Names, TgtHold_EMG_p_values, TgtHold_EMG_perc_changes] = ...
-    EMG_TgtHold_Histogram(xds_morn, xds_noon, muscle_groups, EMG_Zero_Factor, EMG_Norm_Factor, Save_Figs)
+    EMG_TgtHold_Histogram(xds_morn, xds_noon, muscle_groups, EMG_Zero_Factor, EMG_Norm_Factor, Save_File)
 
 %% Display the function being used
 disp('Target Hold EMG Histogram:');
@@ -35,9 +35,8 @@ end
 title_font_size = 15;
 font_name = 'Arial';
 
-if ~isequal(Save_Figs, 0)
+if ~isequal(Save_File, 0)
     close all
-    save_title = strings;
 end
 
 % Define the window for the baseline phase
@@ -237,15 +236,9 @@ for jj = 1:num_dirs
             'LineStyle','--', 'Color', [.5 0 .5], 'LineWidth', mean_line_width)
 
         % Set the title
-        EMG_title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
+        Fig_Title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
         title(sprintf('TgtHold EMG, %i°, TgtCenter at %0.1f: %s', ...
-            target_dirs_noon(jj), target_centers_noon(jj), EMG_title), 'FontSize', title_font_size)
-
-        % Get the top subplot title for saving
-        if ~isequal(Save_Figs, 0)
-            fig_info = get(gca,'title');
-            save_title{ii} = get(fig_info, 'string');
-        end
+            target_dirs_noon(jj), target_centers_noon(jj), Fig_Title), 'FontSize', title_font_size)
 
         % Annotation of the p_value
         if round(TgtHold_EMG_p_values(ii, jj), 3) > 0
@@ -318,26 +311,7 @@ for jj = 1:num_dirs
 
     end % End of the EMG loop
 
-end % End of target loop
+    %% Save the file if selected
+    Save_Figs(Fig_Title, Save_File)
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = numel(findobj('type','figure')):-1:1
-        save_title{ii} = strrep(save_title{ii}, ':', '');
-        save_title{ii} = strrep(save_title{ii}, 'vs.', 'vs');
-        save_title{ii} = strrep(save_title{ii}, 'mg.', 'mg');
-        save_title{ii} = strrep(save_title{ii}, 'kg.', 'kg');
-        save_title{ii} = strrep(save_title{ii}, '.', '_');
-        save_title{ii} = strrep(save_title{ii}, '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title{ii})), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title{ii})), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title{ii})), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title{ii})), 'fig')
-        end
-        close gcf
-    end
-end
+end % End of target loop

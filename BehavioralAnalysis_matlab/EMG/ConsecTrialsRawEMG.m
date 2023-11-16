@@ -1,4 +1,4 @@
-function ConsecTrialsRawEMG(xds, trial_num, muscle_groups, Save_Figs)
+function ConsecTrialsRawEMG(xds, trial_num, muscle_groups, Save_File)
 
 %% Find the EMG index
 
@@ -149,12 +149,13 @@ subplot(211)
 plot(cat_relative_timing(1:first_trial_idx,1), cat_selected_EMG(1:first_trial_idx,:), ...
     'linewidth', 1)
 
-% Titling the top plot
+% Titling the bottom plot
 if ~strcmp(trial_num, 'All')
-    title(sprintf('First %i Succesful Trials: Raw EMG', trial_num),  'FontSize', title_font_size)
+    Fig_Title = sprintf('First %i Succesful Trials: EMG', trial_num);
 else
-    title('All Succesful Trials: Raw EMG',  'FontSize', title_font_size)
+    Fig_Title = 'All Trials: EMG';
 end
+title(Fig_Title, 'FontSize', title_font_size)
 
 % Axis Labels
 ylabel('Raw EMG',  'FontSize', label_font_size)
@@ -207,10 +208,11 @@ plot(cat_relative_timing(last_five_start_idx:last_five_end_idx,1), ...
 
 % Titling the bottom plot
 if ~strcmp(trial_num, 'All')
-    title(sprintf('Last %i Succesful Trials: Raw EMG', trial_num),  'FontSize', title_font_size)
+    Fig_Title = sprintf('Last %i Succesful Trials: EMG', trial_num);
 else
-    title('All Trials: Raw EMG',  'FontSize', title_font_size)
+    Fig_Title = 'All Trials: EMG';
 end
+title(Fig_Title, 'FontSize', title_font_size)
 
 % Axes Labels
 xlabel('Time (Sec.)',  'FontSize', label_font_size)
@@ -296,23 +298,8 @@ end
 
 legend boxoff
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = 1:numel(findobj('type','figure'))
-        save_title = strcat(num2str(trial_num), {' '}, 'Consecutive Succesful Trials, Raw EMG', {' '}, muscle_groups);
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title)), 'fig')
-        end
-        close gcf
-    end
-end
-
+%% Save the file if selected
+Save_Figs(Fig_Title, Save_File)
 
 
 

@@ -1,6 +1,6 @@
 function [Baseline_CursorPos_p_values, Baseline_CursorPos_perc_changes, ...
     Morn_Baseline_CursorPos, Err_Morn_Baseline_CursorPos, Noon_Baseline_CursorPos, Err_Noon_Baseline_CursorPos] = ...
-    Baseline_CursorPos_Stats(xds_morn, xds_noon, norm_cursor, Plot_Figs, Save_Figs)
+    Baseline_CursorPos_Stats(xds_morn, xds_noon, norm_cursor, Plot_Figs, Save_File)
 
 %% File Description:
 
@@ -59,7 +59,6 @@ num_dirs = length(target_dirs_morn);
 % Save Counter
 if ~isequal(Save_Figs, 0)
     close all
-    save_title = strings;
 end
 
 %% Begin the loop through all directions
@@ -199,17 +198,12 @@ for jj = 1:num_dirs
 
         % Titling the plot
         if ~isequal(per_dir_curs, 0)
-            title_string = sprintf('Baseline Wrist Position, %i°, TgtCenter at %0.1f', ...
+            Fig_Title = sprintf('Baseline Wrist Position, %i°, TgtCenter at %0.1f', ...
                 target_dirs_noon(jj), target_centers_morn(jj));
-            title(title_string, 'FontSize', title_font_size)
+            title(Fig_Title, 'FontSize', title_font_size)
         else
-            title_string = 'Baseline Wrist Position';
-            title(title_string, 'FontSize', title_font_size)
-        end
-
-        % Get the top subplot title for saving
-        if ~isequal(Save_Figs, 0)
-            save_title(jj) = title_string;
+            Fig_Title = 'Baseline Wrist Position';
+            title(Fig_Title, 'FontSize', title_font_size)
         end
 
         % Annotation of the p_value
@@ -323,33 +317,16 @@ for jj = 1:num_dirs
         % Set The Font
         set(figure_axes, 'FontName', font_name);
 
+        %% Save the file if selected
+        Save_Figs(Fig_Title, Save_File)
+
     end % End of the Plot if-statement
 
     % End the function if you only want one baseline cursor
     if ~isequal(per_dir_curs, 1) && isequal(jj, 2)
         return
     end
-    
+
 end % End of target loop
 
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = numel(findobj('type','figure')):-1:1
-        save_title(ii) = strrep(save_title(ii), ':', '');
-        save_title(ii) = strrep(save_title(ii), 'vs.', 'vs');
-        save_title(ii) = strrep(save_title(ii), 'mg.', 'mg');
-        save_title(ii) = strrep(save_title(ii), 'kg.', 'kg');
-        save_title(ii) = strrep(save_title(ii), '.', '_');
-        save_title(ii) = strrep(save_title(ii), '/', '_');
-        if ~strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), Save_Figs)
-        end
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'png')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(save_title(ii))), 'fig')
-        end
-        close gcf
-    end
-end
+

@@ -1,4 +1,4 @@
-function Per_Trial_EMG(xds, event, EMG_Zero_Factor, EMG_Norm_Factor, muscle_group, Save_Figs)
+function Per_Trial_EMG(xds, event, EMG_Zero_Factor, EMG_Norm_Factor, muscle_group, Save_File)
 
 %% Display the function being used
 disp('Per Trial EMG Function:');
@@ -23,9 +23,6 @@ half_window_length = Bin_Params.half_window_length; % Time (sec.)
 
 % Binning information
 bin_size = xds.bin_width; % Time (sec.)
-
-% Define the figure titles
-EMG_title = strings;
 
 if ~contains(event, 'window')
     max_amp_time = 0;
@@ -53,8 +50,6 @@ EMG_time = EMG_time(1:end-1) + bin_size/2;
 %% Indexes for rewarded trials in all directions
 % Counts the number of directions used
 num_dirs = length(target_dirs);
-
-cc = 1;
 
 %% Begin the loop through all directions
 for jj = 1:num_dirs
@@ -131,15 +126,15 @@ for jj = 1:num_dirs
 
         % Titling the plot
         EMG_name = strrep(string(xds.EMG_names(M(ii))),'EMG_','');
-        EMG_title{cc} = sprintf('EMG, %i°, TgtCenter at %0.1f: %s', ...
+        Fig_Title = sprintf('EMG, %i°, TgtCenter at %0.1f: %s', ...
             target_dirs(jj), target_centers(jj), EMG_name);
         if contains(xds.meta.rawFileName, 'Pre')
-            EMG_title{cc} = strcat(EMG_title{cc}, ' (Morning)');
+            Fig_Title = strcat(Fig_Title, ' (Morning)');
         end
         if contains(xds.meta.rawFileName, 'Post')
-            EMG_title{cc} = strcat(EMG_title{cc}, ' (Afternoon)');
+            Fig_Title = strcat(Fig_Title, ' (Afternoon)');
         end
-        title(EMG_title{cc}, 'FontSize', title_font_size)
+        title(Fig_Title, 'FontSize', title_font_size)
 
         % Labels
         ylabel('EMG', 'FontSize', label_font_size);
@@ -209,27 +204,9 @@ for jj = 1:num_dirs
 
         cc = cc + 1;
 
+        %% Save the file if selected
+        Save_Figs(Fig_Title, Save_File)
+
     end % End of the muscle loop
 
 end % End of target loop
-
-%% Define the save directory & save the figures
-if ~isequal(Save_Figs, 0)
-    save_dir = 'C:\Users\rhpow\Desktop\';
-    for ii = length(findobj('type','figure')):-1:1
-        EMG_title{ii} = strrep(EMG_title{ii}, ':', '');
-        EMG_title{ii} = strrep(EMG_title{ii}, 'vs.', 'vs');
-        EMG_title{ii} = strrep(EMG_title{ii}, 'mg.', 'mg');
-        EMG_title{ii} = strrep(EMG_title{ii}, 'kg.', 'kg');
-        EMG_title{ii} = strrep(EMG_title{ii}, '.', '_');
-        EMG_title{ii} = strrep(EMG_title{ii}, '/', '_');
-        if strcmp(Save_Figs, 'All')
-            saveas(gcf, fullfile(save_dir, char(EMG_title{ii})), 'png')
-            saveas(gcf, fullfile(save_dir, char(EMG_title{ii})), 'pdf')
-            saveas(gcf, fullfile(save_dir, char(EMG_title{ii})), 'fig')
-        else
-            saveas(gcf, fullfile(save_dir, char(EMG_title{ii})), Save_Figs)
-        end
-        close gcf
-    end
-end
