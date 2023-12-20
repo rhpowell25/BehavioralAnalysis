@@ -21,10 +21,8 @@ disp('Baseline Cursor Position Statistics:');
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Font specifications
-legend_font_size = 12;
-title_font_size = 15;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Define the window for the baseline phase
 time_before_gocue = 0.4;
@@ -184,7 +182,8 @@ for jj = 1:num_dirs
         Baseline_y_min = Baseline_cursor_p_mean - Baseline_cursor_p_std;
         Baseline_y_max = Baseline_cursor_p_mean + Baseline_cursor_p_std;
 
-        figure
+        CursorPos_fig = figure;
+        CursorPos_fig.Position = [200 50 Plot_Params.fig_size Plot_Params.fig_size];
         subplot(211) 
         hold on
         boxplot(avg_cursor_p, baseline_cursor_p_labels)
@@ -200,10 +199,10 @@ for jj = 1:num_dirs
         if ~isequal(per_dir_curs, 0)
             Fig_Title = sprintf('Baseline Wrist Position, %i°, TgtCenter at %0.1f', ...
                 target_dirs_noon(jj), target_centers_morn(jj));
-            title(Fig_Title, 'FontSize', title_font_size)
+            title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
         else
             Fig_Title = 'Baseline Wrist Position';
-            title(Fig_Title, 'FontSize', title_font_size)
+            title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
         end
 
         % Annotation of the p_value
@@ -214,8 +213,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
         if isequal(round(Baseline_CursorPos_p_values(1, jj), 3), 0)
             legend_dims = [0 0.45 0.44 0.44];
@@ -224,8 +223,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
 
         % Annotation of the percent change
@@ -236,8 +235,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
         if isequal(round(Baseline_CursorPos_perc_changes(1, jj), 3), 0)
             legend_dims = [0.55 0.45 0.44 0.44];
@@ -246,8 +245,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
 
         % Set ticks to outside
@@ -257,7 +256,7 @@ for jj = 1:num_dirs
         % Remove the top and right tick marks
         set(figure_axes,'box','off')
         % Set The Font
-        set(figure_axes,'FontName', font_name);
+        set(figure_axes,'FontName', Plot_Params.font_name);
         
         % Bottom Left Plot
         per_trial_ymax_morn = max(all_trials_z_cursor_p_morn, [], 'All');
@@ -270,7 +269,7 @@ for jj = 1:num_dirs
         subplot(223) 
         hold on
         % Set the title
-        title('Morning', 'FontSize', title_font_size);
+        title('Morning', 'FontSize', Plot_Params.title_font_size);
         for pp = 1:width(all_trials_z_cursor_p_morn)
             plot(all_trials_z_cursor_p_morn(:,pp))
         end
@@ -282,8 +281,8 @@ for jj = 1:num_dirs
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
             'FitBoxToText', 'on', 'verticalalignment', 'top', ...
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
 
         % Setting the y-axis limits
         ylim([y_min - abs(y_min/8), y_max + abs(y_max/8)])
@@ -291,7 +290,7 @@ for jj = 1:num_dirs
         subplot(224) % Bottom Right Plot
         hold on
         % Set the title
-        title('Afternoon', 'FontSize', title_font_size);
+        title('Afternoon', 'FontSize', Plot_Params.title_font_size);
         for pp = 1:width(all_trials_z_cursor_p_noon)
             plot(all_trials_z_cursor_p_noon(:,pp))
         end
@@ -303,8 +302,8 @@ for jj = 1:num_dirs
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
             'FitBoxToText', 'on', 'verticalalignment', 'top', ...
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
 
         % Setting the y-axis limits
         ylim([y_min - abs(y_min/8), y_max + abs(y_max/8)])
@@ -315,7 +314,7 @@ for jj = 1:num_dirs
         % Remove the top and right tick marks
         set(figure_axes,'box','off')
         % Set The Font
-        set(figure_axes, 'FontName', font_name);
+        set(figure_axes, 'FontName', Plot_Params.font_name);
 
         %% Save the file if selected
         Save_Figs(Fig_Title, Save_File)

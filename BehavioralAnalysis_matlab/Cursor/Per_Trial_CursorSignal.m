@@ -63,14 +63,8 @@ elseif strcmp(signal_choice, 'Acc')
     curs_sig = xds.curs_a;
 end
 
-% Font specifications
-label_font_size = 12;
-title_font_size = 13;
-axes_line_size = 1;
-plot_line_size = 3;
-font_name = 'Arial';
-figure_width = 600;
-figure_height = 600;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 %% Indexes for rewarded trials in all directions
 % Counts the number of directions used
@@ -140,7 +134,7 @@ for jj = 1:num_dirs
     %% Plot the decomposed individual cursor signals on the top
 
     Cursor_figure = figure;
-    Cursor_figure.Position = [300 150 figure_width figure_height];
+    Cursor_figure.Position = [300 150 Plot_Params.fig_size Plot_Params.fig_size];
     tiledlayout(2,1);
     nexttile
     hold on
@@ -163,33 +157,33 @@ for jj = 1:num_dirs
     if contains(event, 'gocue')
         % Solid dark green line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0]);
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0]);
         % Dotted dark green line indicating beginning of measured window
         line([-time_before_gocue, -time_before_gocue], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0], 'LineStyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0], 'LineStyle','--');
     elseif contains(event, 'end')
         % Solid red line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color', 'r');
+            'LineWidth', Plot_Params.mean_line_width, 'color', 'r');
         % Dotted red line indicating beginning of measured window
         line([-time_before_end, -time_before_end], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color','r','linestyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'color','r','linestyle','--');
     end
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
         line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width,'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
         line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width,'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window
         line([-0.1, -0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
         % Dotted red line indicating end of measured window
         line([0.1, 0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
     end
     
     % Define the labels
@@ -202,16 +196,16 @@ for jj = 1:num_dirs
     end
 
     % Labeling the axis
-    ylabel(signal_label, 'FontSize', label_font_size);
+    ylabel(signal_label, 'FontSize', Plot_Params.label_font_size);
     
     % Titling the top plot
     Fig_Title = sprintf('%s: %i°, TgtCenter at %0.1f', ... 
         signal_label, target_dirs(jj), target_centers(jj));
-    title(Fig_Title, 'FontSize', title_font_size)
+    title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
     % Remove x-axis ticks
     figure_axes = gca;
-    figure_axes.LineWidth = axes_line_size;
+    figure_axes.LineWidth = Plot_Params.axes_line_width;
     x_labels = string(figure_axes.XAxis.TickLabels);
     x_labels(1:end) = NaN;
     figure_axes.XAxis.TickLabels = x_labels;
@@ -220,7 +214,7 @@ for jj = 1:num_dirs
     % Remove the top and right tick marks
     set(gca,'box','off')
     % Set The Font
-    set(figure_axes,'FontName', font_name);
+    set(figure_axes,'FontName', Plot_Params.font_name);
 
     %% Plot the individual cursor signals on the bottom
 
@@ -255,42 +249,44 @@ for jj = 1:num_dirs
     if contains(event, 'gocue')
         % Solid dark green line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0]);
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0]);
         % Dotted dark green line indicating beginning of measured window
         line([-time_before_gocue, -time_before_gocue], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0], 'LineStyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0], 'LineStyle','--');
     elseif contains(event, 'end')
         % Solid red line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color', 'r');
+            'LineWidth', Plot_Params.mean_line_width, 'color', 'r');
         % Dotted red line indicating beginning of measured window
         line([-time_before_end, -time_before_end], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color','r','linestyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'color','r','linestyle','--');
     end
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
         line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+            'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
         line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+            'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window
         line([-0.1, -0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
         % Dotted red line indicating end of measured window
         line([0.1, 0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
     end
     
     % Labeling the axis
-    ylabel(signal_label, 'FontSize', label_font_size);
-    xlabel('Time (sec.)', 'FontSize', label_font_size);
+    ylabel(signal_label, 'FontSize', Plot_Params.label_font_size);
+    xlabel('Time (sec.)', 'FontSize', Plot_Params.label_font_size);
 
     % Only label every other tick
     figure_axes = gca;
-    figure_axes.LineWidth = axes_line_size;
+    figure_axes.LineWidth = Plot_Params.axes_line_width;
     x_labels = string(figure_axes.XAxis.TickLabels);
     x_labels(2:2:end) = NaN;
     figure_axes.XAxis.TickLabels = x_labels;
@@ -299,7 +295,7 @@ for jj = 1:num_dirs
     % Remove the top and right tick marks
     set(gca,'box','off')
     % Set The Font
-    set(figure_axes,'FontName', font_name);
+    set(figure_axes,'FontName', Plot_Params.font_name);
 
     %% Save the file if selected
     Save_Figs(Fig_Title, Save_File)

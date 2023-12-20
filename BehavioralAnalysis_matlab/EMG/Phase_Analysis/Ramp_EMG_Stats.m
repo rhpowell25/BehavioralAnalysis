@@ -17,10 +17,8 @@ end
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Font specifications
-legend_font_size = 12;
-title_font_size = 15;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Save Counter
 ss = 1;
@@ -203,7 +201,7 @@ for jj = 1:num_dirs
             % Titling the plot
             Fig_Title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
             title(sprintf('Ramp phase EMG, %i°, TgtCenter at %0.1f: %s', ...
-                target_dirs_noon(jj), target_centers_noon(jj), Fig_Title), 'FontSize', title_font_size)
+                target_dirs_noon(jj), target_centers_noon(jj), Fig_Title), 'FontSize', Plot_Params.title_font_size)
     
             % Annotation of the p_value
             if round(Ramp_EMG_p_values(ii, jj), 3) > 0
@@ -213,8 +211,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
             if isequal(round(Ramp_EMG_p_values(ii, jj), 3), 0)
                 legend_dims = [0 0.45 0.44 0.44];
@@ -223,8 +221,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
     
             % Annotation of the percent change
@@ -235,8 +233,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
             if isequal(round(Ramp_EMG_perc_changes(ii, jj), 3), 0)
                 legend_dims = [0.55 0.45 0.44 0.44];
@@ -245,8 +243,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
     
             % Set ticks to outside
@@ -256,12 +254,12 @@ for jj = 1:num_dirs
             % Remove the top and right tick marks
             set(figure_axes,'box','off')
             % Set The Font
-            set(figure_axes,'FontName', font_name);
+            set(figure_axes,'FontName', Plot_Params.font_name);
     
             subplot(223) % Bottom Left Plot
             hold on
             % Set the title
-            title('Morning', 'FontSize', title_font_size);
+            title('Morning', 'FontSize', Plot_Params.title_font_size);
             for pp = 1:length(aligned_end_EMG_morn)
                 plot(aligned_end_EMG_morn{pp,1}(:,ii))
             end
@@ -273,8 +271,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
     
             % Set ticks to outside
             figure_axes = gca;
@@ -282,12 +280,12 @@ for jj = 1:num_dirs
             % Remove the top and right tick marks
             set(figure_axes,'box','off')
             % Set The Font
-            set(figure_axes,'FontName', font_name);
+            set(figure_axes,'FontName', Plot_Params.font_name);
     
             subplot(224) % Bottom Right Plot
             hold on
             % Set the title
-            title('Afternoon', 'FontSize', title_font_size);
+            title('Afternoon', 'FontSize', Plot_Params.title_font_size);
             for pp = 1:length(aligned_end_EMG_noon)
                 plot(aligned_end_EMG_noon{pp,1}(:,ii))
             end
@@ -299,8 +297,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
     
             % Set ticks to outside
             figure_axes = gca;
@@ -308,7 +306,7 @@ for jj = 1:num_dirs
             % Remove the top and right tick marks
             set(figure_axes,'box','off')
             % Set The Font
-            set(figure_axes,'FontName', font_name);
+            set(figure_axes,'FontName', Plot_Params.font_name);
 
             ss = ss + 1;
 

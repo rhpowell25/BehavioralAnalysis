@@ -6,11 +6,8 @@ function ConsecTrialsEMG(xds, EMG_Zero_Factor, EMG_Norm_Factor, trial_num, muscl
 
 %% Some variable extraction & definitions
 
-% Font specifications
-label_font_size = 17;
-legend_font_size = 10;
-title_font_size = 14;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Do you want to plot the trial lines (Yes = 1; No = 0)
 trial_lines = 1;
@@ -162,11 +159,11 @@ if ~strcmp(trial_num, 'All')
 else
     Fig_Title = 'All Trials: EMG';
 end
-title(Fig_Title, 'FontSize', title_font_size)
+title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
 % Axis Labels
-ylabel('EMG', 'FontSize', label_font_size)
-xlabel('Time (Sec.)', 'FontSize', label_font_size)
+ylabel('EMG', 'FontSize', Plot_Params.label_font_size)
+xlabel('Time (Sec.)', 'FontSize', Plot_Params.label_font_size)
 
 %% Line indicating go cue and rewards (Top Plot)
 
@@ -229,11 +226,11 @@ if ~strcmp(trial_num, 'All')
 else
     Fig_Title = 'All Trials: EMG';
 end
-title(Fig_Title, 'FontSize', title_font_size)
+title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
 % Axes Labels
-ylabel('EMG', 'FontSize', label_font_size)
-xlabel('Time (Sec.)', 'FontSize', label_font_size)
+ylabel('EMG', 'FontSize', Plot_Params.label_font_size)
+xlabel('Time (Sec.)', 'FontSize', Plot_Params.label_font_size)
 
 %% Line indicating go cue and rewards (Bottom Plot)
 
@@ -290,7 +287,7 @@ if length(M) == 12
         sprintf('%s', strrep(string(xds.EMG_names(M(10))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(11))),'EMG_',' ')), ... 
         sprintf('%s', strrep(string(xds.EMG_names(M(12))),'EMG_',' ')), ... 
-        'NumColumns', 6, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 6, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthEast');
 end
 
@@ -301,7 +298,7 @@ if length(M) == 6
         sprintf('%s', strrep(string(xds.EMG_names(M(4))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(5))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(6))),'EMG_',' ')), ... 
-        'NumColumns', 6, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 6, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthEast');
 end
 
@@ -310,7 +307,7 @@ if length(M) == 4
         sprintf('%s', strrep(string(xds.EMG_names(M(2))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(3))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(4))),'EMG_',' ')), ... 
-        'NumColumns', 4, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 4, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthEast');
 end
 
@@ -318,20 +315,20 @@ if length(M) == 3
     legend(sprintf('%s', strrep(string(xds.EMG_names(M(1))),'EMG_',' ')), ... 
         sprintf('%s', strrep(string(xds.EMG_names(M(2))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(3))),'EMG_',' ')), ...
-        'NumColumns', 3, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 3, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthEast');
 end
 
 if length(M) == 2
     legend(sprintf('%s', strrep(string(xds.EMG_names(M(1))),'EMG_',' ')), ... 
         sprintf('%s', strrep(string(xds.EMG_names(M(2))),'EMG_',' ')), ... 
-        'NumColumns', 2, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 2, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthEast');
 end
 
 if length(M) == 1
     legend(sprintf('%s', strrep(string(xds.EMG_names(M(1))),'EMG_',' ')), ... 
-        'NumColumns', 2, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 2, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthEast');
 end
 
@@ -340,8 +337,8 @@ legend boxoff
 %% Only label every other tick
 
 % Set The Font
-set(top_figure_axes,'fontname', font_name);
-set(bottom_figure_axes,'fontname', font_name);
+set(top_figure_axes,'fontname', Plot_Params.font_name);
+set(bottom_figure_axes,'fontname', Plot_Params.font_name);
 % Set ticks to outside
 set(top_figure_axes,'TickDir','out');
 set(bottom_figure_axes,'TickDir','out');

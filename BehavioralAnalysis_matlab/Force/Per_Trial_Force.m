@@ -38,10 +38,8 @@ elseif contains(event, 'end')
     end
 end
 
-% Font specifications
-label_font_size = 12;
-title_font_size = 13;
-plot_line_size = 3;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 %% Indexes for rewarded trials in all directions
 % Counts the number of directions used
@@ -131,43 +129,45 @@ for jj = 1:num_dirs
     if contains(event, 'gocue')
         % Solid dark green line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0]);
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0]);
         % Dotted dark green line indicating beginning of measured window
         line([-time_before_gocue, -time_before_gocue], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0], 'LineStyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0], 'LineStyle','--');
     elseif contains(event, 'end')
         % Solid red line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color', 'r');
+            'LineWidth', Plot_Params.mean_line_width, 'color', 'r');
         % Dotted red line indicating beginning of measured window
         line([-time_before_end, -time_before_end], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color','r','linestyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'color','r','linestyle','--');
     end
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
         line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+            'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
         line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+            'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window
         line([-0.1, -0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
         % Dotted red line indicating end of measured window
         line([0.1, 0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
     end
     
     % Labeling the axis
-    ylabel('Force', 'FontSize', label_font_size);
-    xlabel('Time (sec.)', 'FontSize', label_font_size);
+    ylabel('Force', 'FontSize', Plot_Params.label_font_size);
+    xlabel('Time (sec.)', 'FontSize', Plot_Params.label_font_size);
     
     % Titling the top plot
     Fig_Title = sprintf('Decomposed Force: %i°, TgtCenter at %0.1f', ... 
         target_dirs(jj), target_centers(jj));
-    title(Fig_Title, 'FontSize', title_font_size)
+    title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
     %% Plot the individual force positions on the bottom
 
@@ -206,42 +206,44 @@ for jj = 1:num_dirs
     if contains(event, 'gocue')
         % Solid dark green line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0]);
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0]);
         % Dotted dark green line indicating beginning of measured window
         line([-time_before_gocue, -time_before_gocue], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'Color', [0 0.5 0], 'LineStyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0], 'LineStyle','--');
     elseif contains(event, 'end')
         % Solid red line indicating the aligned time
         line([0, 0], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color', 'r');
+            'LineWidth', Plot_Params.mean_line_width, 'color', 'r');
         % Dotted red line indicating beginning of measured window
         line([-time_before_end, -time_before_end], [ylims(1), ylims(2)], ...
-            'LineWidth', plot_line_size, 'color','r','linestyle','--');
+            'LineWidth', Plot_Params.mean_line_width, 'color','r','linestyle','--');
     end
 
     if contains(event, 'window')
         % Dotted purple line indicating beginning of measured window
         line([max_fr_time - half_window_length, max_fr_time - half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+            'color',[.5 0 .5],'linestyle','--');
         % Dotted purple line indicating end of measured window
         line([max_fr_time + half_window_length, max_fr_time + half_window_length], ... 
-            [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+            'color',[.5 0 .5],'linestyle','--');
     elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
         % Dotted red line indicating beginning of measured window
         line([-0.1, -0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
         % Dotted red line indicating end of measured window
         line([0.1, 0.1], [ylims(1), ylims(2)], ...
-            'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+            'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
     end
     
     % Labeling the axis
-    ylabel('Force', 'FontSize', label_font_size);
-    xlabel('Time (sec.)', 'FontSize', label_font_size);
+    ylabel('Force', 'FontSize', Plot_Params.label_font_size);
+    xlabel('Time (sec.)', 'FontSize', Plot_Params.label_font_size);
     
     % Titling the bottom plot
     title(sprintf('Force: %i°, TgtCenter at %0.1f', ... 
-        target_dirs(jj), target_centers(jj)), 'FontSize', title_font_size)
+        target_dirs(jj), target_centers(jj)), 'FontSize', Plot_Params.title_font_size)
 
     %% Save the file if selected
     Save_Figs(Fig_Title, Save_File)

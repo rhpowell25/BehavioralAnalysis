@@ -16,10 +16,8 @@ end
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Font specifications
-legend_font_size = 12;
-title_font_size = 15;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 if ~isequal(Save_File, 0)
     close all
@@ -236,10 +234,11 @@ for jj = 1:num_dirs
             Fig_Title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
             if ~isequal(per_dir_EMG, 0)
                 title(sprintf('Baseline EMG, %i°, TgtCenter at %0.1f: %s', ...
-                    target_dir_noon(jj), unique_targets_noon(kk), Fig_Title), 'FontSize', title_font_size)
+                    target_dir_noon(jj), unique_targets_noon(kk), Fig_Title), ...
+                    'FontSize', Plot_Params.title_font_size)
             else
                 title(sprintf('Baseline EMG, All Trials: %s', ...
-                    Fig_Title), 'FontSize', title_font_size)
+                    Fig_Title), 'FontSize', Plot_Params.title_font_size)
             end      
 
             % Annotation of the p_value
@@ -250,8 +249,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
 
             if isequal(round(Baseline_EMG_p_values(ii, jj), 3), 0)
@@ -261,8 +260,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
             
             % Annotation of the percent change
@@ -273,8 +272,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
             if isequal(round(Baseline_EMG_perc_changes(ii, jj), 3), 0)
                 legend_dims = [0.55 0.45 0.44 0.44];
@@ -283,8 +282,8 @@ for jj = 1:num_dirs
                 ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                     'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                     'EdgeColor','none', 'horizontalalignment', 'center');
-                ann_legend.FontSize = legend_font_size;
-                ann_legend.FontName = font_name;
+                ann_legend.FontSize = Plot_Params.legend_size;
+                ann_legend.FontName = Plot_Params.font_name;
             end
 
             per_trial_ymax_morn = max(all_trials_baseline_EMG_morn{ii,1}, [], 'All');
@@ -297,7 +296,7 @@ for jj = 1:num_dirs
             subplot(223) % Bottom Left Plot
             hold on
             % Set the title
-            title('Morning', 'FontSize', title_font_size);
+            title('Morning', 'FontSize', Plot_Params.title_font_size);
             for pp = 1:width(all_trials_baseline_EMG_morn{ii})
                 plot(absolute_baseline_EMG_timing_morn, all_trials_baseline_EMG_morn{ii}(:,pp))
             end
@@ -309,8 +308,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
 
             % Setting the y-axis limits
             ylim([y_min - abs(y_min/8), y_max + abs(y_max/8)])
@@ -318,7 +317,7 @@ for jj = 1:num_dirs
             subplot(224) % Bottom Right Plot
             hold on
             % Set the title
-            title('Afternoon', 'FontSize', title_font_size);
+            title('Afternoon', 'FontSize', Plot_Params.title_font_size);
             for pp = 1:width(all_trials_baseline_EMG_noon{ii})
                 plot(absolute_baseline_EMG_timing_noon, all_trials_baseline_EMG_noon{ii}(:,pp))
             end
@@ -330,8 +329,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
 
             % Setting the y-axis limits
             ylim([y_min - abs(y_min/8), y_max + abs(y_max/8)])
@@ -342,7 +341,7 @@ for jj = 1:num_dirs
             % Remove the top and right tick marks
             set(figure_axes,'box','off')
             % Set The Font
-            set(figure_axes, 'FontName', font_name);
+            set(figure_axes, 'FontName', Plot_Params.font_name);
 
         end % End of the EMG loop
 

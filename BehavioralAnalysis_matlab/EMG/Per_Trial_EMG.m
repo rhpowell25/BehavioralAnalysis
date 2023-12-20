@@ -36,12 +36,8 @@ elseif contains(event, 'end')
     time_before_end = xds.meta.TgtHold;
 end
 
-% Font specifications
-label_font_size = 15;
-title_font_size = 15;
-plot_line_size = 3;
-figure_width = 750;
-figure_height = 250;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 %% X-axis
 EMG_time = (-before_event:bin_size:after_event);
@@ -121,7 +117,7 @@ for jj = 1:num_dirs
         y_min = round(min(all_trials_EMG{ii,1}, [], 'All')) - 10;
 
         EMG_figure = figure;
-        EMG_figure.Position = [300 300 figure_width figure_height];
+        EMG_figure.Position = [300 300 Plot_Params.fig_size Plot_Params.fig_size / 2];
         hold on
 
         % Titling the plot
@@ -134,11 +130,11 @@ for jj = 1:num_dirs
         if contains(xds.meta.rawFileName, 'Post')
             Fig_Title = strcat(Fig_Title, ' (Afternoon)');
         end
-        title(Fig_Title, 'FontSize', title_font_size)
+        title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
         % Labels
-        ylabel('EMG', 'FontSize', label_font_size);
-        xlabel('Time (sec.)', 'FontSize', label_font_size);
+        ylabel('EMG', 'FontSize', Plot_Params.label_font_size);
+        xlabel('Time (sec.)', 'FontSize', Plot_Params.label_font_size);
 
         % Setting the x-axis limits
         if contains(event, 'gocue')
@@ -173,33 +169,35 @@ for jj = 1:num_dirs
         if contains(event, 'gocue')
             % Solid dark green line indicating the aligned time
             line([0, 0], [ylims(1), ylims(2)], ...
-                'LineWidth', plot_line_size, 'Color', [0 0.5 0]);
+                'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0]);
             % Dotted dark green line indicating beginning of measured window
             line([-time_before_gocue, -time_before_gocue], [ylims(1), ylims(2)], ...
-                'LineWidth', plot_line_size, 'Color', [0 0.5 0], 'LineStyle','--');
+                'LineWidth', Plot_Params.mean_line_width, 'Color', [0 0.5 0], 'LineStyle','--');
         elseif contains(event, 'end')
             % Solid red line indicating the aligned time
             line([0, 0], [ylims(1), ylims(2)], ...
-                'LineWidth', plot_line_size, 'color', 'r');
+                'LineWidth', Plot_Params.mean_line_width, 'color', 'r');
             % Dotted red line indicating beginning of measured window
             line([-time_before_end, -time_before_end], [ylims(1), ylims(2)], ...
-                'LineWidth', plot_line_size, 'color','r','linestyle','--');
+                'LineWidth', Plot_Params.mean_line_width, 'color','r','linestyle','--');
         end
     
         if contains(event, 'window')
             % Dotted purple line indicating beginning of measured window
             line([max_amp_time(ii) - half_window_length, max_amp_time(ii) - half_window_length], ... 
-                [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+                [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+                'color',[.5 0 .5],'linestyle','--');
             % Dotted purple line indicating end of measured window
             line([max_amp_time(ii) + half_window_length, max_amp_time(ii) + half_window_length], ... 
-                [ylims(1), ylims(2)], 'linewidth', plot_line_size,'color',[.5 0 .5],'linestyle','--');
+                [ylims(1), ylims(2)], 'linewidth', Plot_Params.mean_line_width, ...
+                'color',[.5 0 .5],'linestyle','--');
         elseif ~contains(event, 'trial_gocue') && ~contains(event, 'trial_end')
             % Dotted red line indicating beginning of measured window
             line([-0.1, -0.1], [ylims(1), ylims(2)], ...
-                'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+                'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
             % Dotted red line indicating end of measured window
             line([0.1, 0.1], [ylims(1), ylims(2)], ...
-                'Linewidth', plot_line_size, 'Color', 'r', 'Linestyle','--');
+                'Linewidth', Plot_Params.mean_line_width, 'Color', 'r', 'Linestyle','--');
         end
 
         cc = cc + 1;

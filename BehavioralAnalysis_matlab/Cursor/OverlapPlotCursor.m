@@ -47,12 +47,8 @@ elseif contains(event, 'end')
     time_before_end = xds_morn.meta.TgtHold;
 end
 
-% Font & figure specifications
-label_font_size = 15;
-title_font_size = 15;
-legend_font_size = 12;
-figure_width = 750;
-figure_height = 250;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 %% Load the average cursor signals
 
@@ -101,7 +97,7 @@ y_limits(2) = max(y_max, [],'all') + 0.125;
 for ii = 1:length(avg_curs_sig_morn)
 
     Overlap_Cursor_figure = figure;
-    Overlap_Cursor_figure.Position = [300 300 figure_width figure_height];
+    Overlap_Cursor_figure.Position = [300 300 Plot_Params.fig_size Plot_Params.fig_size / 2];
 
     hold on
     plot(cursor_time, avg_curs_sig_morn{ii,1}, 'LineWidth', 2, 'Color', [0.9290, 0.6940, 0.1250])
@@ -144,13 +140,13 @@ for ii = 1:length(avg_curs_sig_morn)
     end
     
     % Labeling the axis
-    ylabel(signal_label, 'FontSize', label_font_size);
-    xlabel('Time (sec.)', 'FontSize', label_font_size);
+    ylabel(signal_label, 'FontSize', Plot_Params.label_font_size);
+    xlabel('Time (sec.)', 'FontSize', Plot_Params.label_font_size);
     
     % Titling the plot
     Fig_Title = sprintf('Mean %s: %i°, TgtCenter at %0.1f', ... 
         signal_label, target_dirs_morn(ii), target_centers_morn(ii));
-    title(Fig_Title, 'FontSize', title_font_size)
+    title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
     % Remove the box of the plot
     box off
@@ -163,7 +159,7 @@ for ii = 1:length(avg_curs_sig_morn)
     end
 
     % Legend
-    legend('Morning', 'Afternoon', 'Location', legend_location, 'FontSize', legend_font_size)
+    legend('Morning', 'Afternoon', 'Location', legend_location, 'FontSize', Plot_Params.legend_size)
 
     % Remove the legend's outline
     legend boxoff 

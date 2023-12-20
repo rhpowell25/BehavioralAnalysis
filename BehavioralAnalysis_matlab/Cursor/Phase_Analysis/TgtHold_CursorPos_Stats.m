@@ -21,10 +21,8 @@ disp('TgtHold Cursor Position Statistics:');
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Font specifications
-legend_font_size = 12;
-title_font_size = 15;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Define the window for the baseline phase
 TgtHold_time = xds_morn.meta.TgtHold;
@@ -180,7 +178,7 @@ for jj = 1:num_dirs
         % Titling the plot
         Fig_Title = sprintf('TgtHold Wrist Position, %i°, TgtCenter at %0.1f', ...
             target_dirs_noon(jj), target_centers_noon(jj));
-        title(Fig_Title, 'FontSize', title_font_size)
+        title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
         % Annotation of the p_value
         if round(TgtHold_CursorPos_p_values(1, jj), 3) > 0
@@ -190,8 +188,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
         if isequal(round(TgtHold_CursorPos_p_values(1, jj), 3), 0)
             legend_dims = [0 0.45 0.44 0.44];
@@ -200,8 +198,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
 
         % Annotation of the percent change
@@ -212,8 +210,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
         if isequal(round(TgtHold_CursorPos_perc_changes(1, jj), 3), 0)
             legend_dims = [0.55 0.45 0.44 0.44];
@@ -222,8 +220,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
 
         % Set ticks to outside
@@ -233,7 +231,7 @@ for jj = 1:num_dirs
         % Remove the top and right tick marks
         set(figure_axes,'box','off')
         % Set The Font
-        set(figure_axes,'FontName', font_name);
+        set(figure_axes,'FontName', Plot_Params.font_name);
 
         % Bottom Left Plot
         per_trial_ymax_morn = max(all_trials_z_cursor_p_morn, [], 'All');
@@ -246,7 +244,7 @@ for jj = 1:num_dirs
         subplot(223) 
         hold on
         % Set the title
-        title('Morning', 'FontSize', title_font_size);
+        title('Morning', 'FontSize', Plot_Params.title_font_size);
         for pp = 1:width(all_trials_z_cursor_p_morn)
             plot(all_trials_z_cursor_p_morn(:,pp))
         end
@@ -258,8 +256,8 @@ for jj = 1:num_dirs
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
             'FitBoxToText', 'on', 'verticalalignment', 'top', ...
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
 
         % Setting the axis limits
         ylim([y_min - 1.5*abs(y_min), y_max + 1.5*abs(y_max)])
@@ -268,7 +266,7 @@ for jj = 1:num_dirs
         subplot(224) % Bottom Right Plot
         hold on
         % Set the title
-        title('Afternoon', 'FontSize', title_font_size);
+        title('Afternoon', 'FontSize', Plot_Params.title_font_size);
         for pp = 1:width(all_trials_z_cursor_p_noon)
             plot(all_trials_z_cursor_p_noon(:,pp))
         end
@@ -280,8 +278,8 @@ for jj = 1:num_dirs
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
             'FitBoxToText', 'on', 'verticalalignment', 'top', ...
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
 
         % Setting the axis limits
         ylim([y_min - 1.5*abs(y_min), y_max + 1.5*abs(y_max)])
@@ -293,7 +291,7 @@ for jj = 1:num_dirs
         % Remove the top and right tick marks
         set(figure_axes,'box','off')
         % Set The Font
-        set(figure_axes, 'FontName', font_name);
+        set(figure_axes, 'FontName', Plot_Params.font_name);
 
         %% Save the file if selected
         Save_Figs(Fig_Title, Save_File)

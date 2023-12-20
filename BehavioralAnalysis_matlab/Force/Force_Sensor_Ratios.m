@@ -6,13 +6,9 @@ disp('Force Sensor Ratios:');
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Font specifications
-label_font_size = 17;
-title_font_size = 14;
-mean_line_width = 5;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 p_value_dims = [0.575 0.375 0.44 0.44];
-legend_size = 15;
-font_name = 'Arial';
 
 % Save Counter
 if ~isequal(Save_File, 0)
@@ -149,8 +145,8 @@ for jj = 1:num_dirs
     hold on
     
     % Label the axis
-    xlabel('Force Sensor Ratios', 'FontSize', label_font_size);
-    ylabel('Trial Numbers', 'FontSize', label_font_size);
+    xlabel('Force Sensor Ratios', 'FontSize', Plot_Params.label_font_size);
+    ylabel('Trial Numbers', 'FontSize', Plot_Params.label_font_size);
     
     % Date
     File_Name = xds_noon.meta.rawFileName;
@@ -178,7 +174,7 @@ for jj = 1:num_dirs
     % Set the title
     Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': Force Sensor Ratios');
     title(strcat(Fig_Title, sprintf(': %i°, TgtCenter at %0.1f', ... 
-        target_dirs_morn(jj), target_centers_morn(jj))), 'FontSize', title_font_size)
+        target_dirs_morn(jj), target_centers_morn(jj))), 'FontSize', Plot_Params.title_font_size)
     
     histogram(per_trial_Force_ratio_morn, 15, 'EdgeColor', 'k', 'FaceColor', [0.9290, 0.6940, 0.1250])
     histogram(per_trial_Force_ratio_noon, 15, 'EdgeColor', 'k', 'FaceColor', [.5 0 .5])
@@ -189,9 +185,9 @@ for jj = 1:num_dirs
     
     % Plot the means
     line([Force_ratio_morn Force_ratio_morn], [y_limits(1) y_limits(2) + 0.25], ... 
-        'LineStyle','--', 'Color', [0.9290, 0.6940, 0.1250], 'LineWidth', mean_line_width)
+        'LineStyle','--', 'Color', [0.9290, 0.6940, 0.1250], 'LineWidth', Plot_Params.mean_line_width)
     line([Force_ratio_noon Force_ratio_noon], [y_limits(1) y_limits(2) + 0.25], ... 
-        'LineStyle','--', 'Color', [.5 0 .5], 'LineWidth', mean_line_width)
+        'LineStyle','--', 'Color', [.5 0 .5], 'LineWidth', Plot_Params.mean_line_width)
     
     % Plot dummy points for the legend
     dummy_morn = plot(-1,-1, 's', 'MarkerSize',20, 'LineWidth', 1.5, ...
@@ -202,7 +198,7 @@ for jj = 1:num_dirs
     % Plot the legend
     legend([dummy_morn, dummy_noon], ... 
         {'Morning', 'Afternoon'}, ... 
-        'FontSize', legend_size, 'Location', 'NorthEast')
+        'FontSize', Plot_Params.legend_size, 'Location', 'NorthEast')
     legend boxoff
     
     % Annotation of the p_value
@@ -213,8 +209,8 @@ for jj = 1:num_dirs
         ann_p_value = annotation('textbox', p_value_dims, 'String', p_value_string, ... 
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_p_value.FontSize = legend_size;
-        ann_p_value.FontName = font_name;
+        ann_p_value.FontSize = Plot_Params.legend_size;
+        ann_p_value.FontName = Plot_Params.font_name;
     end
     
     if isequal(round(force_ratio_p_val, 3), 0)
@@ -223,8 +219,8 @@ for jj = 1:num_dirs
         ann_p_value = annotation('textbox', p_value_dims, 'String', p_value_string, ...
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_p_value.FontSize = legend_size;
-        ann_p_value.FontName = font_name;
+        ann_p_value.FontSize = Plot_Params.legend_size;
+        ann_p_value.FontName = Plot_Params.font_name;
     end
 
     %% Save the file if selected

@@ -14,10 +14,8 @@ end
 
 %% Some variable extraction & definitions
 
-% Font specifications
-label_font_size = 17;
-title_font_size = 14;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Do you want to plot the trial lines (Yes = 1; No = 0)
 trial_lines = 0;
@@ -154,11 +152,11 @@ if ~strcmp(trial_num, 'All')
 else
     Fig_Title = 'All Succesful Trials: Force';
 end
-title(Fig_Title, 'FontSize', title_font_size)
+title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
 % Axis Labels
-ylabel('Force', 'FontSize', label_font_size)
-xlabel('Time (Sec.)', 'FontSize', label_font_size)
+ylabel('Force', 'FontSize', Plot_Params.label_font_size)
+xlabel('Time (Sec.)', 'FontSize', Plot_Params.label_font_size)
 
 %% Line indicating go cue and rewards (Top Plot)
 
@@ -187,7 +185,7 @@ end
 %% Only label every other tick
 figure_axes = gca;
 % Set The Font
-set(figure_axes,'fontname', font_name);
+set(figure_axes,'fontname', Plot_Params.font_name);
 x_labels = string(figure_axes.XAxis.TickLabels);
 y_labels = string(figure_axes.YAxis.TickLabels);
 x_labels(2:2:end) = NaN;
@@ -219,11 +217,11 @@ if ~strcmp(trial_num, 'All')
 else
     Fig_Title = 'All Succesful Trials: Force';
 end
-title(Fig_Title, 'FontSize', title_font_size)
+title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
 % Axes Labels
-ylabel('Force', 'FontSize', label_font_size)
-xlabel('Time (Sec.)', 'FontSize', label_font_size)
+ylabel('Force', 'FontSize', Plot_Params.label_font_size)
+xlabel('Time (Sec.)', 'FontSize', Plot_Params.label_font_size)
 
 %% Line indicating go cue and rewards (Bottom Plot)
 
@@ -252,7 +250,7 @@ end
 %% Only label every other tick
 figure_axes = gca;
 % Set The Font
-set(figure_axes,'fontname', font_name);
+set(figure_axes,'fontname', Plot_Params.font_name);
 x_labels = string(figure_axes.XAxis.TickLabels);
 y_labels = string(figure_axes.YAxis.TickLabels);
 x_labels(2:2:end) = NaN;

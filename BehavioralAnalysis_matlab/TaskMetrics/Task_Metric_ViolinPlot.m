@@ -52,12 +52,8 @@ end
 [target_dirs_morn, target_centers_morn] = Identify_Targets(xds_morn);
 [target_dirs_noon, target_centers_noon] = Identify_Targets(xds_noon);
 
-% Font specifications
-label_font_size = 17;
-legend_font_size = 13;
-title_font_size = 20;
-font_name = 'Arial';
-fig_size = 600;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Close all previously open figures if you're saving 
 if ~isequal(Save_File, 0)
@@ -93,13 +89,15 @@ for jj = 1:num_dir
         event = 'task_onset';
     end
     if isequal(per_dir_plot, 0)
-        [rewarded_gocue_time_morn] = GoCueAlignmentTimes(xds_morn, NaN, 'Max');
-        [rewarded_gocue_time_noon] = GoCueAlignmentTimes(xds_noon, NaN, 'Max');
+        [rewarded_gocue_time_morn] = TrialAlignmentTimes(xds_morn, NaN, 'Max', 'trial_goCue');
+        [rewarded_gocue_time_noon] = TrialAlignmentTimes(xds_noon, NaN, 'Max', 'trial_goCue');
         [Alignment_Times_morn] = EventAlignmentTimes(xds_morn, NaN, 'Max', event);
         [Alignment_Times_noon] = EventAlignmentTimes(xds_noon, NaN, 'Max', event);
     else
-        [rewarded_gocue_time_morn] = GoCueAlignmentTimes(xds_morn, target_dirs_morn(jj), target_centers_morn(jj));
-        [rewarded_gocue_time_noon] = GoCueAlignmentTimes(xds_noon, target_dirs_noon(jj), target_centers_noon(jj));
+        [rewarded_gocue_time_morn] = ...
+            TrialAlignmentTimes(xds_morn, target_dirs_morn(jj), target_centers_morn(jj), 'trial_goCue');
+        [rewarded_gocue_time_noon] = ...
+            TrialAlignmentTimes(xds_noon, target_dirs_noon(jj), target_centers_noon(jj), 'trial_goCue');
         [Alignment_Times_morn] = EventAlignmentTimes(xds_morn, target_dirs_morn(jj), target_centers_morn(jj), event);
         [Alignment_Times_noon] = EventAlignmentTimes(xds_noon, target_dirs_noon(jj), target_centers_noon(jj), event);
     end
@@ -120,7 +118,7 @@ for jj = 1:num_dir
     if isequal(Plot_Figs, 1)
 
         violin_fig = figure;
-        violin_fig.Position = [200 50 fig_size fig_size];
+        violin_fig.Position = [200 50 Plot_Params.fig_size Plot_Params.fig_size];
         
         % Title
         if ~isequal(per_dir_plot, 0)
@@ -130,7 +128,7 @@ for jj = 1:num_dir
         else
             Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug);
         end
-        sgtitle(Fig_Title, 'FontSize', title_font_size);
+        sgtitle(Fig_Title, 'FontSize', Plot_Params.title_font_size);
     
         % Morning violin plot
         subplot(1,2,1);
@@ -143,8 +141,8 @@ for jj = 1:num_dir
         morn_legend = annotation('textbox', [0.35 0.1 0.1 0.1], 'String', ...
             morn_succ_trials, 'FitBoxToText', 'on', 'EdgeColor','none', ...
             'VerticalAlignment', 'top', 'horizontalalignment', 'right');
-        morn_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        morn_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
     
         % Find the axis limits for plotting
         y_min = min(cat(1, time_length_morn, time_length_noon)) - axis_expansion;
@@ -155,12 +153,12 @@ for jj = 1:num_dir
         xlim([0.5, 1.5]);
     
         % Labels
-        xlabel('Morning', 'FontSize', label_font_size)
+        xlabel('Morning', 'FontSize', Plot_Params.label_font_size)
         if strcmp(Task_Metric, 'Rxn_Time')
-            ylabel('Reaction Time (Sec.)', 'FontSize', label_font_size);
+            ylabel('Reaction Time (Sec.)', 'FontSize', Plot_Params.label_font_size);
         end
         if strcmp(Task_Metric, 'Trial_Length')
-            ylabel('Trial Length (Sec.)', 'FontSize', label_font_size);
+            ylabel('Trial Length (Sec.)', 'FontSize', Plot_Params.label_font_size);
         end
     
         % Axis Editing
@@ -170,7 +168,7 @@ for jj = 1:num_dir
         % Remove the top and right tick marks
         set(figure_axes,'box','off')
         % Set the tick label font size
-        figure_axes.FontSize = label_font_size;
+        figure_axes.FontSize = Plot_Params.label_font_size;
     
         % Only label every other tick
         x_labels = string(figure_axes.XAxis.TickLabels);
@@ -191,15 +189,15 @@ for jj = 1:num_dir
         noon_legend = annotation('textbox', [0.6 0.1 0.1 0.1], 'String', ...
             noon_succ_trials, 'FitBoxToText', 'on', 'EdgeColor','none', ...
             'VerticalAlignment', 'top', 'horizontalalignment', 'right');
-        noon_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        noon_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
     
         % Axis limits
         ylim([y_min, y_max])
         xlim([0.5, 1.5]);
     
         % Labels
-        xlabel('Afternoon', 'FontSize', label_font_size)
+        xlabel('Afternoon', 'FontSize', Plot_Params.label_font_size)
     
         % Axis Editing
         figure_axes = gca;
@@ -208,7 +206,7 @@ for jj = 1:num_dir
         % Remove the top and right tick marks
         set(figure_axes,'box','off')
         % Set the tick label font size
-        figure_axes.FontSize = label_font_size;
+        figure_axes.FontSize = Plot_Params.label_font_size;
     
         % Only label every other tick
         x_labels = string(figure_axes.XAxis.TickLabels);
@@ -237,7 +235,7 @@ for jj = 1:num_dir
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
+            ann_legend.FontSize = Plot_Params.legend_size;
         end
         if isequal(round(violin_plot_p_val, 3), 0)
             legend_dims = [0.015 0.45 0.44 0.44];
@@ -246,7 +244,7 @@ for jj = 1:num_dir
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
+            ann_legend.FontSize = Plot_Params.legend_size;
         end
 
         % Find the percent change
@@ -264,8 +262,8 @@ for jj = 1:num_dir
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
         if isequal(round(violin_plot_perc_change, 3), 0)
             legend_dims = [0.55 0.45 0.44 0.44];
@@ -274,9 +272,12 @@ for jj = 1:num_dir
             ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ...
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_font_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
+
+        %% Save the file if selected
+        Save_Figs(Fig_Title, Save_File)
 
     end % End of Plot_Figs statement
 
@@ -285,8 +286,7 @@ for jj = 1:num_dir
     % Mean reaction time
     rxn_time(jj,1) = (mean(time_length_morn) + mean(time_length_noon)) / 2;
 
-    %% Save the file if selected
-    Save_Figs(Fig_Title, Save_File)
+    
 
     %% End the function after one loop if using all targets
     if isequal(per_dir_plot, 0)

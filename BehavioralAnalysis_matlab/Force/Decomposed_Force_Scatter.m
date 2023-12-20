@@ -15,10 +15,8 @@ decom_Force = 1;
 % How much to enlarge the axis (to make room for the legend)
 axis_expansion = 1;
 
-% Font specifications
-label_font_size = 17;
-legend_font_size = 13;
-title_font_size = 14;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Save Counter
 if ~isequal(Save_File, 0)
@@ -235,8 +233,8 @@ force_fig.Position = [200 50 800 600];
 hold on
 
 % Label the axis
-xlabel('Force: Sensor 1', 'FontSize', label_font_size);
-ylabel('Force: Sensor 2', 'FontSize', label_font_size);
+xlabel('Force: Sensor 1', 'FontSize', Plot_Params.label_font_size);
+ylabel('Force: Sensor 2', 'FontSize', Plot_Params.label_font_size);
 
 % Date
 File_Name = xds_noon.meta.rawFileName;
@@ -263,7 +261,7 @@ end
 
 % Set the title
 Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': Decomposed Force');
-title(Fig_Title, 'FontSize', title_font_size)
+title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
 % Force marker shape & marker size
 decom_marker_metric ='.';
@@ -370,7 +368,8 @@ dummy_square = scatter(-50, -50, 75, 's', 'MarkerEdgeColor',[0 0 0]);
 dummy_star = scatter(-55, -55, 75, '*', 'MarkerEdgeColor',[0 0 0]);
 % Plot dummy points for the bottom right legend
 dummy_yellow = plot(-40,-40, '.', 'MarkerSize',20, ...
-    'MarkerEdgeColor', [0.9290, 0.6940, 0.1250], 'MarkerFaceColor', [0.9290, 0.6940, 0.1250], 'LineWidth', 1.5);
+    'MarkerEdgeColor', [0.9290, 0.6940, 0.1250], 'MarkerFaceColor', ...
+    [0.9290, 0.6940, 0.1250], 'LineWidth', 1.5);
 dummy_purple = plot(-45,-45, '.', 'MarkerSize',20, ...
     'MarkerEdgeColor', [0.5 0 0.5], 'MarkerFaceColor', [0.5 0 0.5], 'LineWidth', 1.5);
 if ~isequal(recom_Force, 0) && ~isequal(decom_Force, 0)
@@ -386,11 +385,12 @@ ylim([axis_min, axis_max])
 
 % Plot the bottom right legend
 if ~isequal(recom_Force, 0) || ~isequal(decom_Force, 0)
-    right_legend = legend([dummy_yellow, dummy_purple, dummy_red, dummy_black], {'Morning', 'Afternoon', 'p <= 0.05', 'p > 0.05'}, ...
-        'FontSize', legend_font_size, 'Location', 'SouthEast');
+    right_legend = legend([dummy_yellow, dummy_purple, dummy_red, dummy_black], ...
+        {'Morning', 'Afternoon', 'p <= 0.05', 'p > 0.05'}, ...
+        'FontSize', Plot_Params.legend_size, 'Location', 'SouthEast');
 else
     right_legend = legend([dummy_yellow, dummy_purple], {'Morning', 'Afternoon'}, ...
-        'FontSize', legend_font_size, 'Location', 'SouthEast');
+        'FontSize', Plot_Params.legend_size, 'Location', 'SouthEast');
 end
 right_legend.ItemTokenSize(1) = 15;
 legend boxoff
@@ -402,14 +402,14 @@ end
 if ~isequal(recom_Force, 0) && ~isequal(decom_Force, 0)
     left_legend = legend(legend_axes, [dummy_circle, dummy_square, dummy_star], ...
         {'Single Trials', 'Mean Force', 'Recomposed Mean Force'}, ...
-        'FontSize', legend_font_size, 'Location', 'northwest');
+        'FontSize', Plot_Params.legend_size, 'Location', 'northwest');
 elseif isequal(recom_Force, 0) && ~isequal(decom_Force, 0)
     left_legend = legend(legend_axes, [dummy_circle, dummy_square], ...
-        {'Single Trials', 'Mean Force'}, 'FontSize', legend_font_size, 'Location', 'northwest');
+        {'Single Trials', 'Mean Force'}, 'FontSize', Plot_Params.legend_size, 'Location', 'northwest');
 elseif ~isequal(recom_Force, 0) && isequal(decom_Force, 0)
     left_legend = legend(legend_axes, [dummy_circle, dummy_star], ...
         {'Single Trials', 'Recomposed Mean Force'}, ...
-        'FontSize', legend_font_size, 'Location', 'northwest');
+        'FontSize', Plot_Params.legend_size, 'Location', 'northwest');
 end
 left_legend.ItemTokenSize(1) = 15;
 legend boxoff

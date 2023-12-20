@@ -2,11 +2,8 @@ function EMG_Summary(xds, muscle_groups, time_length, Save_File)
 
 %% Basic Settings, some variable extractions, & definitions
 
-% Font specifications
-title_font_size = 15;
-label_font_size = 10;
-figure_width = 700;
-figure_height = 750;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 %% Find the EMG index
 
@@ -91,16 +88,16 @@ lowpassed_EMG = filtfilt(b_low, a_low, rect_EMG);
 for ii = 1:width(raw_EMG)
 
     EMG_sum_fig = figure;
-    EMG_sum_fig.Position = [200 50 figure_width figure_height];
+    EMG_sum_fig.Position = [200 50 Plot_Params.fig_size Plot_Params.fig_size];
     Fig_Title = strcat('EMG Summary:', strrep(string(EMG_names(ii)),'EMG_',' '));
-    sgtitle(Fig_Title, 'FontSize', (title_font_size + 5), 'Interpreter', 'None');
+    sgtitle(Fig_Title, 'FontSize', (Plot_Params.title_font_size + 5), 'Interpreter', 'None');
 
     % Raw EMG
     subplot(4,1,1)
     hold on
-    title('Raw EMG:', 'FontSize', title_font_size)
-    xlabel('Time (sec)', 'FontSize', label_font_size)
-    ylabel('Amplitude', 'FontSize', label_font_size)
+    title('Raw EMG:', 'FontSize', Plot_Params.title_font_size)
+    xlabel('Time (sec)', 'FontSize', Plot_Params.label_font_size)
+    ylabel('Amplitude', 'FontSize', Plot_Params.label_font_size)
     plot(raw_EMG_timeframe(1:raw_time_idx), raw_EMG(1:raw_time_idx, ii), 'Color', 'k')
     x_max = max(raw_EMG_timeframe(1:raw_time_idx));
     x_min = min(raw_EMG_timeframe(1:raw_time_idx));
@@ -109,9 +106,9 @@ for ii = 1:width(raw_EMG)
     % Log Scale Welch Power Spectral Density
     subplot(4,1,2)
     hold on
-    title('Log Scale Welch PSD', 'FontSize', title_font_size)
-    xlabel('Frequency (Hz)', 'FontSize', label_font_size)
-    ylabel('Power / Frequency (dB/Hz)', 'FontSize', label_font_size)
+    title('Log Scale Welch PSD', 'FontSize', Plot_Params.title_font_size)
+    xlabel('Frequency (Hz)', 'FontSize', Plot_Params.label_font_size)
+    ylabel('Power / Frequency (dB/Hz)', 'FontSize', Plot_Params.label_font_size)
     plot(welch_freq, 10*log10(raw_EMG_welch_PSD(:,ii)), 'Color', 'k')
     figure_axes = gca;
     figure_axes.XScale = 'log';
@@ -122,9 +119,9 @@ for ii = 1:width(raw_EMG)
     % Notched Raw EMG
     subplot(4,1,3)
     hold on
-    title('Notched & High-Pass Filtered:', 'FontSize', title_font_size)
-    xlabel('Time (sec)', 'FontSize', label_font_size)
-    ylabel('Amplitude', 'FontSize', label_font_size)
+    title('Notched & High-Pass Filtered:', 'FontSize', Plot_Params.title_font_size)
+    xlabel('Time (sec)', 'FontSize', Plot_Params.label_font_size)
+    ylabel('Amplitude', 'FontSize', Plot_Params.label_font_size)
     plot(raw_EMG_timeframe(1:raw_time_idx), highpassed_EMG(1:raw_time_idx, ii), 'Color', 'k')
     x_max = max(raw_EMG_timeframe(1:raw_time_idx));
     x_min = min(raw_EMG_timeframe(1:raw_time_idx));
@@ -133,9 +130,9 @@ for ii = 1:width(raw_EMG)
     % Rectified & Low-Pass Filtered EMG
     subplot(4,1,4)
     hold on
-    title('Rectified & Low-Pass Filtered', 'FontSize', title_font_size)
-    xlabel('Time (sec)', 'FontSize', label_font_size)
-    ylabel('Amplitude', 'FontSize', label_font_size)
+    title('Rectified & Low-Pass Filtered', 'FontSize', Plot_Params.title_font_size)
+    xlabel('Time (sec)', 'FontSize', Plot_Params.label_font_size)
+    ylabel('Amplitude', 'FontSize', Plot_Params.label_font_size)
     plot(raw_EMG_timeframe(1:raw_time_idx), lowpassed_EMG(1:raw_time_idx,ii), 'Color', 'k')
     x_max = max(raw_EMG_timeframe(1:raw_time_idx));
     x_min = min(raw_EMG_timeframe(1:raw_time_idx));

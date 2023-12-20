@@ -6,11 +6,8 @@ function ConsecTrialsRawEMG(xds, trial_num, muscle_groups, Save_File)
 
 %% Some variable extraction & definitions
 
-% Font specifications
-label_font_size = 12;
-legend_font_size = 12;
-title_font_size = 12;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Do you want to plot the trial lines (Yes = 1; No = 0)
 trial_lines = 1;
@@ -155,11 +152,11 @@ if ~strcmp(trial_num, 'All')
 else
     Fig_Title = 'All Trials: EMG';
 end
-title(Fig_Title, 'FontSize', title_font_size)
+title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
 % Axis Labels
-ylabel('Raw EMG',  'FontSize', label_font_size)
-xlabel('Time (Sec.)',  'FontSize', label_font_size)
+ylabel('Raw EMG',  'FontSize', Plot_Params.label_font_size)
+xlabel('Time (Sec.)',  'FontSize', Plot_Params.label_font_size)
 
 %% Line indicating go cue and rewards (Top Plot)
 
@@ -212,11 +209,11 @@ if ~strcmp(trial_num, 'All')
 else
     Fig_Title = 'All Trials: EMG';
 end
-title(Fig_Title, 'FontSize', title_font_size)
+title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
 % Axes Labels
-xlabel('Time (Sec.)',  'FontSize', label_font_size)
-ylabel('Raw EMG',  'FontSize', label_font_size)
+xlabel('Time (Sec.)',  'FontSize', Plot_Params.label_font_size)
+ylabel('Raw EMG',  'FontSize', Plot_Params.label_font_size)
 
 %% Line indicating go cue and rewards (Bottom Plot)
 
@@ -238,7 +235,7 @@ if isequal(trial_lines, 1)
             [ylims(1), ylims(2)], 'linewidth', 2, 'color', [0 0.5 0]);
         % Dotted red line indicating beginning of measured window
         line([relative_end_time(ii) - xds.meta.TgtHold, relative_end_time(ii) - xds.meta.TgtHold], ... 
-            [ylims(1), ylims(2)], 'linewidth',2,'color', 'r','linestyle','--');
+            [ylims(1), ylims(2)], 'linewidth',2, 'color', 'r','linestyle','--');
         % Solid red line indicating the aligned time
         line([relative_end_time(ii), relative_end_time(ii)], ... 
             [ylims(1), ylims(2)], 'linewidth', 2, 'color', 'r');
@@ -259,7 +256,7 @@ if isequal(length(M), 12)
         sprintf('%s', strrep(string(xds.EMG_names(M(10))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(11))),'EMG_',' ')), ... 
         sprintf('%s', strrep(string(xds.EMG_names(M(12))),'EMG_',' ')), ... 
-        'NumColumns', 6, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 6, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthWest');
 end
 
@@ -270,7 +267,7 @@ if isequal(length(M), 6)
         sprintf('%s', strrep(string(xds.EMG_names(M(4))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(5))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(6))),'EMG_',' ')), ... 
-        'NumColumns', 6, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 6, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthWest');
 end
 
@@ -279,20 +276,20 @@ if isequal(length(M), 4)
         sprintf('%s', strrep(string(xds.EMG_names(M(2))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(3))),'EMG_',' ')), ...
         sprintf('%s', strrep(string(xds.EMG_names(M(4))),'EMG_',' ')), ... 
-        'NumColumns', 4, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 4, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthWest');
 end
 
 if isequal(length(M), 2)
     legend(sprintf('%s', strrep(string(xds.EMG_names(M(1))),'EMG_',' ')), ... 
         sprintf('%s', strrep(string(xds.EMG_names(M(2))),'EMG_',' ')), ... 
-        'NumColumns', 4, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 4, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthWest');
 end
 
 if isequal(length(M), 1)
     legend(sprintf('%s', strrep(string(xds.EMG_names(M(1))),'EMG_',' ')), ... 
-        'NumColumns', 4, 'FontSize', legend_font_size, 'FontName', font_name, ...
+        'NumColumns', 4, 'FontSize', Plot_Params.legend_size, 'FontName', Plot_Params.font_name, ...
         'Location', 'NorthWest');
 end
 

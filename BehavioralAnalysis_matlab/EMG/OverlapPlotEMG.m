@@ -35,12 +35,8 @@ elseif contains(event, 'end')
     time_before_end = xds.meta.TgtHold;
 end
 
-% Font & figure specifications
-label_font_size = 15;
-title_font_size = 15;
-legend_font_size = 12;
-figure_width = 750;
-figure_height = 250;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 %% Extract the target directions & centers
 [target_dirs_morn, target_centers_morn] = Identify_Targets(xds_morn);
@@ -86,7 +82,7 @@ for jj = 1:length(avg_EMG_morn)
     for ii = 1:height(avg_EMG_morn{jj,1})
 
         Overlap_EMG_figure = figure;
-        Overlap_EMG_figure.Position = [300 300 figure_width figure_height];
+        Overlap_EMG_figure.Position = [300 300 Plot_Params.fig_size Plot_Params.fig_size / 2];
         hold on
 
         %% Zero the average EMG
@@ -105,7 +101,7 @@ for jj = 1:length(avg_EMG_morn)
         % Titling the plot
         Fig_Title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
         title(sprintf('Mean EMG, %i°, TgtCenter at %0.1f: %s', ...
-            target_dirs_morn(jj), target_centers_morn(jj), Fig_Title), 'FontSize', title_font_size)
+            target_dirs_morn(jj), target_centers_morn(jj), Fig_Title), 'FontSize', Plot_Params.title_font_size)
     
         if contains(event, 'gocue')
             % Dotted green line indicating beginning of measured window
@@ -127,8 +123,8 @@ for jj = 1:length(avg_EMG_morn)
         % Setting the y-axis limits
         %ylim([y_limits(1), y_limits(2)])
         
-        ylabel('EMG', 'FontSize', label_font_size);
-        xlabel('Time (sec.)', 'FontSize', label_font_size);
+        ylabel('EMG', 'FontSize', Plot_Params.label_font_size);
+        xlabel('Time (sec.)', 'FontSize', Plot_Params.label_font_size);
         
         % Remove the box of the plot
         box off
@@ -150,7 +146,7 @@ for jj = 1:length(avg_EMG_morn)
         end
     
         % Legend
-        legend('Morning', 'Afternoon', 'Location', legend_location, 'FontSize', legend_font_size)
+        legend('Morning', 'Afternoon', 'Location', legend_location, 'FontSize', Plot_Params.legend_size)
     
         % Remove the legend's outline
         legend boxoff

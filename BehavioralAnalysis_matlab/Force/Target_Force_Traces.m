@@ -34,11 +34,8 @@ if contains(nontask_info, 'Con')
     Drug = 'Control';
 end
 
-% Font specifications
-label_font_size = 17;
-legend_font_size = 13;
-title_font_size = 14;
-font_name = 'Arial';
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 % Save Counter
 if ~isequal(Save_File, 0)
@@ -276,11 +273,11 @@ for kk = 1:length(target_centers_morn)
 
     % Set the title
     Fig_Title = strcat(Date, {' '}, Task, ',', {' '}, Drug, ': TgtCenter at', {' '}, num2str(target_centers_morn(kk)));
-    title(Fig_Title, 'FontSize', title_font_size)
+    title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
     % Label the axis
-    xlabel('FS1 - FS2', 'FontSize', label_font_size);
-    ylabel('FS1 + FS2', 'FontSize', label_font_size);
+    xlabel('FS1 - FS2', 'FontSize', Plot_Params.label_font_size);
+    ylabel('FS1 + FS2', 'FontSize', Plot_Params.label_font_size);
 
     % Set the axis
     %xlim([-90, 90])
@@ -294,7 +291,7 @@ for kk = 1:length(target_centers_morn)
 
     % Plot the bottom bottom right legend
     right_legend = legend([dummy_yellow, dummy_purple], {'Morning', 'Afternoon'}, ...
-        'FontSize', legend_font_size, 'Location', 'SouthEast');
+        'FontSize', Plot_Params.legend_size, 'Location', 'SouthEast');
     right_legend.ItemTokenSize(1) = 15;
     legend boxoff
 
@@ -306,8 +303,8 @@ for kk = 1:length(target_centers_morn)
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
     end
     if isequal(round(TgtHold_First_Force_p_values(kk), 3), 0)
         legend_dims = [0.05 0 0.4 0.275];
@@ -316,8 +313,8 @@ for kk = 1:length(target_centers_morn)
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
     end
     % Annotation of the FS2 p-value
      if round(TgtHold_Second_Force_p_values(kk), 3) > 0
@@ -327,8 +324,8 @@ for kk = 1:length(target_centers_morn)
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ... 
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
     end
     if isequal(round(TgtHold_Second_Force_p_values(kk), 3), 0)
         legend_dims = [0.05 0 0.4 0.225];
@@ -337,8 +334,8 @@ for kk = 1:length(target_centers_morn)
         ann_legend = annotation('textbox', legend_dims, 'String', legend_string, ...
             'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
             'EdgeColor','none', 'horizontalalignment', 'center');
-        ann_legend.FontSize = legend_font_size;
-        ann_legend.FontName = font_name;
+        ann_legend.FontSize = Plot_Params.legend_size;
+        ann_legend.FontName = Plot_Params.font_name;
     end
 
     %% Save the file if selected

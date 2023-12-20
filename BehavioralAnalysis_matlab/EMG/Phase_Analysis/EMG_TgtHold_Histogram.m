@@ -18,10 +18,8 @@ end
 % Do you want to plot the morning / afternoon legend? (1 = Yes, 0 = No)
 plot_legend = 1;
 
-% Font specifications
-label_font_size = 30;
-legend_size = 30;
-mean_line_width = 5;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 if isequal(plot_legend, 1)
     p_value_dims = [0.51 0.3 0.44 0.44];
 else
@@ -32,8 +30,6 @@ if isequal(plot_legend, 1)
 else
     perc_change_dims = [0.49 0.375 0.44 0.44];
 end
-title_font_size = 15;
-font_name = 'Arial';
 
 if ~isequal(Save_File, 0)
     close all
@@ -231,14 +227,14 @@ for jj = 1:num_dirs
 
         % Plot the means
         line([mean(avg_end_EMG{ii}(:,1)) mean(avg_end_EMG{ii}(:,1))], [y_limits(1) y_limits(2) + 0.25], ... 
-            'LineStyle','--', 'Color', [0.9290, 0.6940, 0.1250], 'LineWidth', mean_line_width)
+            'LineStyle','--', 'Color', [0.9290, 0.6940, 0.1250], 'LineWidth', Plot_Params.mean_line_width)
         line([mean(avg_end_EMG{ii}(:,2)) mean(avg_end_EMG{ii}(:,2))], [y_limits(1) y_limits(2) + 0.25], ... 
-            'LineStyle','--', 'Color', [.5 0 .5], 'LineWidth', mean_line_width)
+            'LineStyle','--', 'Color', [.5 0 .5], 'LineWidth', Plot_Params.mean_line_width)
 
         % Set the title
         Fig_Title = strrep(string(xds_morn.EMG_names(M(ii))),'EMG_','');
         title(sprintf('TgtHold EMG, %i°, TgtCenter at %0.1f: %s', ...
-            target_dirs_noon(jj), target_centers_noon(jj), Fig_Title), 'FontSize', title_font_size)
+            target_dirs_noon(jj), target_centers_noon(jj), Fig_Title), 'FontSize', Plot_Params.title_font_size)
 
         % Annotation of the p_value
         if round(TgtHold_EMG_p_values(ii, jj), 3) > 0
@@ -247,8 +243,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', p_value_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
 
         if isequal(round(TgtHold_EMG_p_values(ii, jj), 3), 0)
@@ -257,8 +253,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', p_value_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
 
         % Annotation of the percent change
@@ -268,8 +264,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', perc_change_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
         if isequal(round(TgtHold_EMG_perc_changes(ii, jj), 2), 0)
             perc_change_string = strcat('Δ% ≈', {' '}, '0');
@@ -277,8 +273,8 @@ for jj = 1:num_dirs
             ann_legend = annotation('textbox', perc_change_dims, 'String', legend_string, ... 
                 'FitBoxToText', 'on', 'verticalalignment', 'top', ... 
                 'EdgeColor','none', 'horizontalalignment', 'center');
-            ann_legend.FontSize = legend_size;
-            ann_legend.FontName = font_name;
+            ann_legend.FontSize = Plot_Params.legend_size;
+            ann_legend.FontName = Plot_Params.font_name;
         end
         
         % Axis Editing
@@ -288,16 +284,16 @@ for jj = 1:num_dirs
         % Remove the top and right tick marks
         set(figure_axes,'box','off')
         % Set the tick label font size
-        figure_axes.FontSize = label_font_size - 15;
+        figure_axes.FontSize = Plot_Params.label_font_size - 15;
 
         % Label the axis
-        ylabel('# of EMG Samples', 'FontSize', label_font_size)
-        xlabel('EMG', 'FontSize', label_font_size)
+        ylabel('# of EMG Samples', 'FontSize', Plot_Params.label_font_size)
+        xlabel('EMG', 'FontSize', Plot_Params.label_font_size)
 
         if isequal(plot_legend, 1)
             legend([dummy_morn, dummy_noon], ... 
                 {'Morning', 'Afternoon'}, ... 
-                'FontSize', legend_size, 'Location', 'NorthEast')
+                'FontSize', Plot_Params.legend_size, 'Location', 'NorthEast')
             legend boxoff
         end
 

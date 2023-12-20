@@ -32,12 +32,8 @@ after_event = Bin_Params.after_event;
 
 axis_expansion = 3;
 
-% Font & figure specifications
-label_font_size = 15;
-title_font_size = 15;
-legend_font_size = 12;
-figure_width = 750;
-figure_height = 250;
+% Font & plotting specifications
+[Plot_Params] = Plot_Parameters;
 
 %% Load the average force
 
@@ -86,7 +82,7 @@ y_limits(2) = max(y_max, [],'all') + axis_expansion;
 for ii = 1:length(average_force_morn)
 
     Overlap_Force_figure = figure;
-    Overlap_Force_figure.Position = [300 300 figure_width figure_height];
+    Overlap_Force_figure.Position = [300 300 Plot_Params.fig_size Plot_Params.fig_size / 2];
 
     hold on
     plot(force_time, average_force_morn{ii,1}, 'LineWidth', 2, 'Color', [0.9290, 0.6940, 0.1250])
@@ -95,7 +91,7 @@ for ii = 1:length(average_force_morn)
     % Titling the top plot
     Fig_Title = sprintf('Mean force: %i°, TgtCenter at %0.1f', ... 
         target_dirs_morn(ii), target_centers_morn(ii));
-    title(Fig_Title, 'FontSize', title_font_size)
+    title(Fig_Title, 'FontSize', Plot_Params.title_font_size)
 
     if contains(event, 'gocue')
         % Dotted green line indicating beginning of measured window
@@ -111,14 +107,14 @@ for ii = 1:length(average_force_morn)
             'linewidth', 2, 'color', 'r');
         % Dotted red line indicating beginning of measured window
         line([-time_before_end, -time_before_end], [y_limits(1), y_limits(2)], ...
-            'linewidth',2,'color','r','linestyle','--');
+            'linewidth', 2, 'color', 'r', 'linestyle','--');
     end
         
     % Setting the y-axis limits
     ylim([y_limits(1), y_limits(2)])
     
-    ylabel('Force', 'FontSize', label_font_size);
-    xlabel('Time (sec.)', 'FontSize', label_font_size);
+    ylabel('Force', 'FontSize', Plot_Params.label_font_size);
+    xlabel('Time (sec.)', 'FontSize', Plot_Params.label_font_size);
     
     % Remove the box of the plot
     box off
@@ -140,7 +136,7 @@ for ii = 1:length(average_force_morn)
     end
 
     % Legend
-    legend('Morning', 'Afternoon', 'Location', legend_location, 'FontSize', legend_font_size)
+    legend('Morning', 'Afternoon', 'Location', legend_location, 'FontSize', Plot_Params.legend_size)
 
     % Remove the legend's outline
     legend boxoff
