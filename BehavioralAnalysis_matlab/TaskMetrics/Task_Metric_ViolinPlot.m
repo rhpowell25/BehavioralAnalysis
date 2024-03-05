@@ -53,7 +53,7 @@ end
 [target_dirs_noon, target_centers_noon] = Identify_Targets(xds_noon);
 
 % Font & plotting specifications
-[Plot_Params] = Plot_Parameters;
+[Plot_Params] = Plot_Specs;
 
 % Close all previously open figures if you're saving 
 if ~isequal(Save_File, 0)
